@@ -1,0 +1,554 @@
+---
+title: "Survival_Analysis_cancer"
+author: "Melvin Galera"
+date: "2024-03-26"
+output:
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+# Global code chunk options; adjust individual codes as required
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 12, fig.height = 12)
+
+# Load libraries
+library(tidyverse)
+library(survival)
+library(ggpubr)
+library(survminer)
+library(sjPlot)
+library(finalfit)
+
+
+# Load data
+cancer_df <-survival::rotterdam 
+
+```
+
+***
+
+## I. Overview
+
+The dataset has 2982 observations and 15 variables:
+
+  * `pid`     : patient identifier
+  * `year`    : year of surgery   
+  * `age`     : age at surgery
+  * `meno`    : menopausal status (0 = premenopausal, 1 = postmenopausal)
+  * `size`    : tumor size (factor with levels: <=20, 20-50,  50<)
+  * `grade`   : differentiation grade
+  * `nodes`   : number of lymph nodes
+  * `pgr`     :progesterone receptors (fmol/l)
+  * `er`      : estrogen receptors (fmol/l)
+  * `hormon`  : hormonal treatment (0 = no, 1 = yes)
+  * `chemo`   : chemotherapy 
+  * `rtime``  : days to relapse or lost follow up
+  * `recur``  : 0 = no relapse, 1 = relapse
+  * `dtime`   :  days to death or last follow up
+  * `death`   : 0 = alive, 1 = dead
+  
+  
+## II. Objective
+
+The objective is to do survival analysis
+
+
+## III. Data 
+
+Initial look at the structure and content of `insurance_df` dataset:
+
+```{r, echo=TRUE}
+str(cancer_df)
+cancer_df %>% head(10)
+
+```
+```{r}
+# check for missing data
+colSums(is.na(cancer_df))
+summary(cancer_df)
+```
+
+## III. Exploratory Analysis
+
+To perform EDA on the dataset, we perform univariate distribution of the variables and the bivariate and multivariate relationships among the variables.
+
+
+### A. Univariate Analysis
+
+```{r, fig.align='center', fig.width=13, fig.height=8}
+
+p1_age <- ggplot(data = cancer_df, aes(x = age)) +
+  geom_histogram(binwidth= 7, color= "skyblue1", fill = "slateblue3") +
+  labs(x = "Age",
+       y = "Count",
+       title = "Age distribution")
+
+p2_nodes <- ggplot(data = cancer_df, aes(x = nodes)) +
+  geom_histogram(binwidth= 3, color= "skyblue1", fill = "slateblue3") +
+  labs(x = "Nodes",
+       y = "Count",
+       title = "Nodes distribution")
+
+p3_pgr <- ggplot(data = cancer_df, aes(x = pgr)) +
+  geom_histogram(binwidth= 420, color= "skyblue1", fill = "slateblue3") +
+  labs(x = "pgr",
+       y = "Count",
+       title = "pgr distribution")
+
+p4_er <- ggplot(data = cancer_df, aes(x = er)) +
+  geom_histogram(binwidth= 300, color= "skyblue1", fill = "slateblue3") +
+  labs(x = "er",
+       y = "Count",
+       title = "er distribution")
+
+p5_size <- ggplot(data = cancer_df, aes(x = size)) +
+  geom_bar(width = 0.7, color= "skyblue1", fill = "slateblue3") +
+  geom_text(data = . %>% 
+              group_by(size) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  labs(x = "Size",
+       y = "Count",
+       title = "Size distribution")
+
+p6_grade <- ggplot(data = cancer_df, aes(x = factor(grade))) +
+  geom_bar(width = 0.7, color= "skyblue1", fill = "slateblue3") +
+  geom_text(data = . %>% 
+              group_by(grade) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  labs(x = "Grade",
+       y = "Count",
+       title = "Grade distribution")
+
+p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), fill = factor(meno))) +
+  geom_bar(width = 0.7) +
+  scale_x_discrete(labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("slateblue3", "peru")) +
+  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  geom_text(data = . %>% 
+              group_by(meno) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  theme(legend.position = "none") +
+  labs(x = "Meno",
+       y = "Count",
+       title = "Meno distribution")
+
+
+p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hormon), fill = factor(hormon))) +
+  geom_bar(width = 0.7) +
+  scale_x_discrete(labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("slateblue3", "peru")) +
+  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  geom_text(data = . %>% 
+              group_by(hormon) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  theme(legend.position = "none") +
+  labs(x = "Hormon",
+       y = "Count",
+       title = "Hormon distribution")
+
+p9_chemo <- ggplot(data = cancer_df, aes(x = factor(chemo), color = factor(chemo), fill = factor(chemo))) +
+  geom_bar(width = 0.7) +
+  scale_x_discrete(labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("slateblue3", "peru")) +
+  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  geom_text(data = . %>% 
+              group_by(chemo) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  theme(legend.position = "none") +
+  labs(x = "Chemo",
+       y = "Count",
+       title = "Chemo distribution")
+
+p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recur), fill = factor(recur))) +
+  geom_bar(width = 0.7) +
+  scale_x_discrete(labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("slateblue3", "peru")) +
+  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  geom_text(data = . %>% 
+              group_by(recur) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  theme(legend.position = "none") +
+  labs(x = "Recur",
+       y = "Count",
+       title = "Recur distribution")
+
+p11_death <- ggplot(data = cancer_df, aes(x = factor(death), color = factor(death), fill = factor(death))) +
+  geom_bar(width = 0.7) +
+  scale_x_discrete(labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("slateblue3", "peru")) +
+  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  geom_text(data = . %>% 
+              group_by(death) %>% 
+              tally() %>% 
+              mutate(prop = round(n/sum(n),3)) %>% 
+              ungroup(),
+            aes(y = n, label = scales::percent(prop)),
+            position = position_stack(vjust=0.5),
+            colour = "white", size = 4)+
+  theme(legend.position = "none") +
+  labs(x = "Death",
+       y = "Count",
+       title = "Death distribution")
+
+ggarrange(p1_age, p2_nodes, p3_pgr, p4_er, 
+          p5_size, p6_grade, p7_meno, p8_hormon, 
+          p9_chemo, p10_recur, p11_death,  ncol =4, nrow = 3)
+
+```
+
+Group some predictors: Age ("24-60", "61-90") and  Nodes (0-10, 11-20, 20+)
+It is also better to factor other predictors such. as Grade, Meno, Hormon, Chemo, Recur and death
+
+```{r}
+age.breaks <- c(24, 61, 91)
+age.tags <- c("24-60", "61-90")
+cancer_df$age.group <- cut(cancer_df$age, breaks = age.breaks,
+                           include.lowest = TRUE,
+                           right = FALSE,
+                           labels = age.tags)
+
+nodes.breaks <- c(0, 11, 21, 35)
+nodes.tags <- c("0-10", "11-20", "21-34")
+cancer_df$nodes.group <- cut(cancer_df$nodes, breaks = nodes.breaks,
+                           include.lowest = TRUE,
+                           right = FALSE,
+                           labels = nodes.tags)
+```
+
+
+```{r}
+cancer_df <- cancer_df %>% 
+  mutate(
+    gradeF = factor(grade),
+    menoF = factor(meno, labels = c("No", "Yes")), 
+    hormonF = factor(hormon, labels = c("No", "Yes")), 
+    chemoF = factor(chemo, labels = c("No", "Yes")),
+    recurF = factor(recur, labels = c("No", "Yes")),
+    deathF = factor(death, labels = c("No", "Yes"))
+  )
+```
+
+```{r}
+str(cancer_df)
+summary(cancer_df)
+```
+
+
+Fit model for overall survival
+  death: censoring status (0= censored/alive, 1= dead)
+  dtime: days until event or censoring
+
+
+### Censoring
+
+Model 1
+
+
+```{r, fig.align="center", fig.width=10, fig.height=4}
+hist_01 <- ggplot(cancer_df, aes(dtime)) +
+  geom_histogram(aes(fill = deathF), alpha = 0.8, bins = 40, position="identity") +
+  scale_fill_manual(values = c("slateblue3", "peru"), labels = c("0 - Alive/Censored", "1 - Dead")) +
+  labs(title = " Distribution of censoring status") +
+  theme(plot.title = element_text(size=11))
+
+hist_01
+```
+
+
+
+Survival data representation using triplet (entry age, exit age, event)
+
+```{r, fig.align="center", fig.width= 10, fig.height=6}
+set.seed(300)
+cancer_df_sample <- cancer_df %>% 
+  slice_sample(n=30) %>% 
+  mutate(order = pid,
+         start = 0,
+         age2 = ((age*365) + dtime)/365,
+         age_relapse = ((age*365)+ rtime)/365)
+
+ggplot(data=cancer_df_sample) +
+  geom_point(aes(x = age, y=factor(order)), color = "black", size = 2) +
+  geom_segment(aes(x=age, xend = age2, y=factor(order), yend = factor(order)), size =1.2) +
+  geom_point(aes(x=age_relapse, y=factor(order)), color = "purple", size = 2) +
+  geom_point(aes(x=age2, y=factor(order), shape = deathF, color = deathF), size = 3, stroke = 1.5) +
+  scale_x_continuous("Age (years)", breaks = seq(20, 90, 10), limits = c(20, 90)) +
+  scale_y_discrete("Patient ID") +
+  scale_shape_manual(NULL, values = c(20,4), labels = c("Alive/Censored", "Died")) +
+  scale_color_manual(NULL, values = c("peru", "red"), labels = c("Alive/Censored", "Died")) +
+  theme_gray()
+
+```
+
+
+Survival data representation using triplet (follow up time, event)
+
+```{r, fig.align="center", fig.width= 10, fig.height=6}
+
+ggplot(data=cancer_df_sample) +
+  geom_segment(aes(x=start, xend = dtime, y=factor(order), yend = factor(order)), size =1.2) +
+  geom_point(aes(x=rtime, y=factor(order)), color = "purple", size = 2) +
+  geom_point(aes(x=dtime, y=factor(order), shape = deathF, color = deathF), size = 3, stroke = 1.5) +
+  geom_text(aes(x=dtime, y=factor(order),label = dtime), nudge_x = 200, size = 3) +
+  scale_x_continuous("Survival time (days)") +
+  scale_y_discrete("Patient ID") +
+  scale_shape_manual(NULL, values = c(20,4), labels = c("Alive/Censored", "Died")) +
+  scale_color_manual(NULL, values = c("peru", "red"), labels = c("Alive/Censored", "Died")) +
+  theme_gray()
+
+```
+
+## III. Kaplan-Meier Survival Curves and Log-Rank Tests
+
+A. Kaplan-Meier Curves
+
+Model 1: OVERALL FIRST
+```{r, echo=TRUE}
+mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
+```
+
+```{r, fig.align="center", fig.width= 8, fig.height= 4}
+ggsurvplot(mod01_sfit, 
+           conf.int = TRUE,
+           risk.table = TRUE, fontsize = 3.5,
+           risk.table.col = "strata",
+           linetype = "strata",
+           xlim = c(0, 7043),
+           surv.median.line = "hv",
+           ggtheme = theme_bw(), 
+           palette = "dodgerblue2")
+```
+
+```{r}
+surv_median(mod01_sfit)
+```
+
+```{r}
+summary(mod01_sfit, times = 1825)
+```
+
+Generate KM curves for explanatory variables:
+
+```{r, echo=TRUE, fig.align="center", fig.width= 14, fig.height= 18}
+m1_age <- survfit(Surv(dtime, death) ~ age.group, data = cancer_df)
+m1_nodes <- survfit(Surv(dtime, death) ~ nodes.group, data = cancer_df)
+m1_pgr <- survfit(Surv(dtime, death) ~ pgr, data = cancer_df)
+m1_er <- survfit(Surv(dtime, death) ~ er, data = cancer_df)
+
+m1_size <- survfit(Surv(dtime, death) ~ size, data = cancer_df)
+m1_grade <- survfit(Surv(dtime, death) ~ gradeF, data = cancer_df)
+m1_meno <- survfit(Surv(dtime, death) ~ menoF, data = cancer_df)
+m1_hormon <- survfit(Surv(dtime, death) ~ hormonF, data = cancer_df)
+m1_chemo <- survfit(Surv(dtime, death) ~ chemoF, data = cancer_df)
+m1_recur <- survfit(Surv(dtime, death) ~ recurF, data = cancer_df)
+
+# define titles
+titlelist <- list("Age", "Nodes", "pgr", "er", "Size", "Grade", "Meno", "Hormon", "Chemo", "Recur")
+
+#Plot
+
+survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_hormon, m1_chemo, m1_recur),
+           pval = TRUE, pval.method = TRUE, conf.int = TRUE,
+           risk.table = TRUE, fontsize = 4,
+           risk.table.col = "strata",
+           linetype = "strata",
+           xlim = c(0, 7043),
+           surv.median.line = "hv",
+           ggtheme = theme_bw(), 
+           palette = c("slateblue3", "peru", "green4"),
+           risk.table.height = 0.30)
+
+arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
+
+```
+B. Log Rank test
+
+By using log rank test, we can test if there is difference in the ssurvival cureves of the categories/predictors.
+
+Null hypothesis, Ho: the survival curves are equal
+Alternate hypothesis, Ha: the survival curves are different for at least some intervals
+
+Use `coxph` function.
+
+```{r, echo=TRUE}
+log.rank.recur <- coxph(Surv(dtime, death) ~ recurF, data = cancer_df)
+summary(log.rank.recur)
+```
+
+The score for the log-rank test for recur is 945.9 with very low p-value. This means we reject the null hypothesis that the survival curves for recur are the same (as visually shown in KM curve)
+
+
+```{r, results='hide'}
+# create a comparison table
+
+covariates <- c("age.group", "nodes.group", "pgr", "er", "size", "gradeF", "menoF", "hormonF", "chemoF", "recurF")
+
+surv.formulas <- sapply(covariates, 
+                        function(x) as.formula(paste('Surv(dtime, death) ~ ', x)))
+
+log.rank.fits <- lapply(surv.formulas,
+                        function(x) {coxph(x, data= cancer_df)})
+
+# extract log-rank test results
+log.rank.results <- lapply(log.rank.fits,
+                           function(x) {
+                             x <- summary(x)
+                             results <- c(round(x$sctest[1], digits = 4), x$sctest[2], round(x$sctest[3], digits = 6))
+                             names(results) <- c("Score (logrank) test", "df", "p.value")
+                             return(results)
+                           })
+
+results.trans <- t(as.data.frame(log.rank.results))
+results.df <- results.trans %>% 
+  as.data.frame() %>% 
+  mutate(Remark = ifelse(p.value < 0.05, "The survival curves have statistically significant differences.", 
+                         "The survival curves have statistically non-significant differences")) %>% 
+  print()
+```
+
+<br>
+
+#### Table __. Log-rank test scores an dp-value for all covariates
+
+```{r}
+sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)
+
+```
+<br>
+
+## IV. Cox proportional hazard regression models
+
+These models give us estimates of the "hazard ratio"
+
+A. Univariable Cox model (same as above)
+
+B. Multivariable Cox model (except er and chemoF)
+
+```{r, echo=TRUE}
+surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
+                      gradeF + menoF + hormonF + recurF, data = cancer_df)
+summary(surv.model)
+```
+
+To check if the multivariable cox model is better than a complex one (complete)
+
+```{r}
+surv.model_full <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + er + size +
+                      gradeF + menoF + hormonF + chemoF + recurF, data = cancer_df)
+
+# anova test
+anova(surv.model, surv.model_full)
+```
+P-value is high which means we can use the reduced model.
+
+```{r}
+summary(surv.model_full)
+```
+
+Comparing univariate and multivariate via table
+
+```{r}
+# create comparison table
+mykable <- function(x){
+  knitr::kable(x, row.names = FALSE, align = c("l", "l", "r", "r", "r", "r", "r", "r", "r"))
+}
+
+dependent_os <- "Surv(dtime, death)"
+
+explanatory <- c("age.group", "nodes.group", "pgr", "er", "size", "gradeF", "menoF", "hormonF", "chemoF", "recurF")
+explanatory_multi <- c("age.group", "nodes.group", "pgr", "size", "gradeF", "menoF", "hormonF", "recurF")
+
+# create table
+cancer_df %>% 
+  finalfit.coxph(dependent_os, explanatory, explanatory_multi) %>% 
+  mykable()
+
+```
+
+
+### Hazard Ratio
+
+```{r, fig.align='center', fig.width=14, fig.height=10}
+ggforest(surv.model, data = cancer_df, fontsize = 1.1)
+```
+
+
+## V. Model Diagnostics
+
+Assess any violation of the proportionality assumption through statistical test based on Schoenfeld residuals.
+
+```{r, echo=TRUE}
+stat.test <- cox.zph(surv.model)
+stat.test
+```
+For this test, significant p-values indicate non-proportional hazards. We can say that `age.group` adn `pgr` variables violate the proportional hazard assumption. This is also evident from the low p-value (<0.05) of the 'GLOBAL' test.
+
+Plot of Schoenfeld residuals against `dtime`.
+
+```{r, fig.align='center', fig.width=15, fig.height= 8}
+ggcoxzph(stat.test)
+
+```
+
+
+We can address these using stratification.
+
+```{r}
+surv.model.stratified <- coxph(Surv(dtime, death) ~ strata(age.group) + nodes.group + strata(pgr) + size +
+                      gradeF + menoF + hormonF + recurF, data = cancer_df)
+
+summary(surv.model.stratified)
+```
+
+```{r, echo=TRUE}
+cox.zph(surv.model.stratified)
+```
+The 'global` test for proportionality now shows a p-value above 0.05 which means the assumption is not violated. 
+
+
+### Hazard Ratio
+
+```{r, fig.align='center', fig.width=14, fig.height=10}
+attr(surv.model.stratified$terms, "dataClasses") <- attr(surv.model.stratified$terms, "dataClasses")[-c(1, 4)]
+ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.1)
+```
+
+
+
+
+
+
+
+
+
+
