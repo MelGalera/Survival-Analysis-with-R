@@ -1,25 +1,15 @@
-Survival_Analysis_cancer
+Breast cancer survival analysis with R
 ================
 Melvin Galera
 2024-03-26
 
-- [I. Overview](#i-overview)
-- [II. Objective](#ii-objective)
-- [III. Data](#iii-data)
-- [III. Exploratory Analysis](#iii-exploratory-analysis)
-  - [A. Univariate Analysis](#a-univariate-analysis)
-  - [Censoring](#censoring)
-- [III. Kaplan-Meier Survival Curves and Log-Rank
-  Tests](#iii-kaplan-meier-survival-curves-and-log-rank-tests)
-- [IV. Cox proportional hazard regression
-  models](#iv-cox-proportional-hazard-regression-models)
-  - [Hazard Ratio](#hazard-ratio)
-- [V. Model Diagnostics](#v-model-diagnostics)
-  - [Hazard Ratio](#hazard-ratio-1)
+### I. Project objective
 
-------------------------------------------------------------------------
+<br> <br>
 
-## I. Overview
+### II. Exploratory Data Analysis
+
+**A. Data Collection**
 
 The dataset has 2982 observations and 15 variables:
 
@@ -38,12 +28,6 @@ The dataset has 2982 observations and 15 variables:
 - \`recur\`\` : 0 = no relapse, 1 = relapse
 - `dtime` : days to death or last follow up
 - `death` : 0 = alive, 1 = dead
-
-## II. Objective
-
-The objective is to do survival analysis
-
-## III. Data
 
 Initial look at the structure and content of `insurance_df` dataset:
 
@@ -129,13 +113,13 @@ cancer_df %>% head(10)
     ##  3rd Qu.:3555   3rd Qu.:1.0000  
     ##  Max.   :7043   Max.   :1.0000
 
-## III. Exploratory Analysis
+**B. Data Exploration**
 
 To perform EDA on the dataset, we perform univariate distribution of the
 variables and the bivariate and multivariate relationships among the
 variables.
 
-### A. Univariate Analysis
+**Univariate plots**
 
 <img src="index_files/figure-gfm/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
@@ -207,7 +191,9 @@ Hormon, Chemo, Recur and death
 Fit model for overall survival death: censoring status (0=
 censored/alive, 1= dead) dtime: days until event or censoring
 
-### Censoring
+<br>
+
+**Censoring**
 
 Model 1
 
@@ -221,9 +207,11 @@ Survival data representation using triplet (follow up time, event)
 
 <img src="index_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
-## III. Kaplan-Meier Survival Curves and Log-Rank Tests
+<br> <br>
 
-A. Kaplan-Meier Curves
+### III. Kaplan-Meier Survival Curves and Log-Rank Tests
+
+**A. Kaplan-Meier Curves**
 
 Model 1: OVERALL FIRST
 
@@ -276,7 +264,9 @@ arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
 ```
 
 <img src="index_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
-B. Log Rank test
+<br>
+
+**B. Log Rank test**
 
 By using log rank test, we can test if there is difference in the
 ssurvival cureves of the categories/predictors.
@@ -315,7 +305,7 @@ curves for recur are the same (as visually shown in KM curve)
 
 <br>
 
-#### Table \_\_. Log-rank test scores an dp-value for all covariates
+Table \_\_. Log-rank test scores an dp-value for all covariates
 
 <table style="border-collapse:collapse; border:none;">
 <tr>
@@ -507,15 +497,21 @@ The survival curves have statistically significant differences.
 </tr>
 </table>
 
-<br>
+<br> <br>
 
-## IV. Cox proportional hazard regression models
+### IV. Cox proportional hazard regression models
 
 These models give us estimates of the “hazard ratio”
 
-A. Univariable Cox model (same as above)
+1.  Model 1 - Univariable Cox model (same as above)
+2.  Model 2 - Multivariable Cox model (except er and chemoF)
+3.  Model 3 - Stratified model
 
-B. Multivariable Cox model (except er and chemoF)
+Models are detailed below.
+
+<br>
+
+**Model 1 - Univariable Cox model**
 
 ``` r
 surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
@@ -560,20 +556,12 @@ summary(surv.model)
     ## Wald test            = 960.4  on 10 df,   p=<2e-16
     ## Score (logrank) test = 1271  on 10 df,   p=<2e-16
 
+<br>
+
+**Model 2 - Multivariable Cox model**
+
 To check if the multivariable cox model is better than a complex one
 (complete)
-
-    ## Analysis of Deviance Table
-    ##  Cox model: response is  Surv(dtime, death)
-    ##  Model 1: ~ age.group + nodes.group + pgr + size + gradeF + menoF + hormonF + recurF
-    ##  Model 2: ~ age.group + nodes.group + pgr + er + size + gradeF + menoF + hormonF + chemoF + recurF
-    ##    loglik  Chisq Df Pr(>|Chi|)  
-    ## 1 -8899.1                       
-    ## 2 -8896.1 5.9876  2     0.0501 .
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-P-value is high which means we can use the reduced model.
 
     ## Call:
     ## coxph(formula = Surv(dtime, death) ~ age.group + nodes.group + 
@@ -617,6 +605,22 @@ P-value is high which means we can use the reduced model.
     ## Wald test            = 963.3  on 12 df,   p=<2e-16
     ## Score (logrank) test = 1275  on 12 df,   p=<2e-16
 
+<br>
+
+**Comparison of models**
+
+    ## Analysis of Deviance Table
+    ##  Cox model: response is  Surv(dtime, death)
+    ##  Model 1: ~ age.group + nodes.group + pgr + size + gradeF + menoF + hormonF + recurF
+    ##  Model 2: ~ age.group + nodes.group + pgr + er + size + gradeF + menoF + hormonF + chemoF + recurF
+    ##    loglik  Chisq Df Pr(>|Chi|)  
+    ## 1 -8899.1                       
+    ## 2 -8896.1 5.9876  2     0.0501 .
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+P-value is high which means we can use the reduced model.
+
 Comparing univariate and multivariate via table
 
 | Dependent: Surv(dtime, death) |           |           all |           HR (univariable) |         HR (multivariable) |
@@ -642,11 +646,9 @@ Comparing univariate and multivariate via table
 | recurF                        | No        |   1464 (49.1) |                         \- |                         \- |
 |                               | Yes       |   1518 (50.9) | 7.68 (6.59-8.95, p\<0.001) | 6.94 (5.94-8.10, p\<0.001) |
 
-### Hazard Ratio
+<br>
 
-<img src="index_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
-
-## V. Model Diagnostics
+**Model Diagnostics**
 
 Assess any violation of the proportionality assumption through
 statistical test based on Schoenfeld residuals.
@@ -674,9 +676,11 @@ the ‘GLOBAL’ test.
 
 Plot of Schoenfeld residuals against `dtime`.
 
-<img src="index_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-23-1.png" style="display: block; margin: auto;" />
 
 We can address these using stratification.
+
+**Model 3 - Stratified model**
 
     ## Call:
     ## coxph(formula = Surv(dtime, death) ~ strata(age.group) + nodes.group + 
@@ -726,6 +730,15 @@ cox.zph(surv.model.stratified)
 
 The ’global\` test for proportionality now shows a p-value above 0.05
 which means the assumption is not violated.
+
+<br>
+
+**Hazard Ratio**
+
+<img src="index_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
+<br> <br>
+
+### V. Conclusion
 
 ### Hazard Ratio
 

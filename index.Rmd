@@ -1,10 +1,10 @@
 ---
-title: "Survival_Analysis_cancer"
+title: "Breast cancer survival analysis with R"
 author: "Melvin Galera"
 date: "2024-03-26"
 output:
   github_document:
-    toc: true
+    toc: false
 ---
 
 ```{r setup, include=FALSE}
@@ -25,9 +25,17 @@ cancer_df <-survival::rotterdam
 
 ```
 
-***
 
-## I. Overview
+### I. Project objective
+
+
+
+<br>
+<br>
+
+### II. Exploratory Data Analysis
+
+**A. Data Collection**
 
 The dataset has 2982 observations and 15 variables:
 
@@ -47,13 +55,6 @@ The dataset has 2982 observations and 15 variables:
   * `dtime`   :  days to death or last follow up
   * `death`   : 0 = alive, 1 = dead
   
-  
-## II. Objective
-
-The objective is to do survival analysis
-
-
-## III. Data 
 
 Initial look at the structure and content of `insurance_df` dataset:
 
@@ -68,12 +69,12 @@ colSums(is.na(cancer_df))
 summary(cancer_df)
 ```
 
-## III. Exploratory Analysis
+**B. Data Exploration**
 
 To perform EDA on the dataset, we perform univariate distribution of the variables and the bivariate and multivariate relationships among the variables.
 
 
-### A. Univariate Analysis
+**Univariate plots**
 
 ```{r, fig.align='center', fig.width=13, fig.height=8}
 
@@ -268,8 +269,9 @@ Fit model for overall survival
   death: censoring status (0= censored/alive, 1= dead)
   dtime: days until event or censoring
 
+<br>
 
-### Censoring
+**Censoring**
 
 Model 1
 
@@ -328,9 +330,12 @@ ggplot(data=cancer_df_sample) +
 
 ```
 
-## III. Kaplan-Meier Survival Curves and Log-Rank Tests
+<br>
+<br>
 
-A. Kaplan-Meier Curves
+### III. Kaplan-Meier Survival Curves and Log-Rank Tests
+
+**A. Kaplan-Meier Curves**
 
 Model 1: OVERALL FIRST
 ```{r, echo=TRUE}
@@ -391,7 +396,9 @@ survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_ho
 arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
 
 ```
-B. Log Rank test
+<br>
+
+**B. Log Rank test**
 
 By using log rank test, we can test if there is difference in the ssurvival cureves of the categories/predictors.
 
@@ -438,21 +445,28 @@ results.df <- results.trans %>%
 
 <br>
 
-#### Table __. Log-rank test scores an dp-value for all covariates
+Table __. Log-rank test scores an dp-value for all covariates
 
 ```{r}
 sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)
 
 ```
 <br>
+<br>
 
-## IV. Cox proportional hazard regression models
+### IV. Cox proportional hazard regression models
 
 These models give us estimates of the "hazard ratio"
 
-A. Univariable Cox model (same as above)
+1. Model 1 - Univariable Cox model (same as above)
+2. Model 2 - Multivariable Cox model (except er and chemoF)
+3. Model 3 - Stratified model
 
-B. Multivariable Cox model (except er and chemoF)
+Models are detailed below.
+
+<br>
+
+**Model 1 - Univariable Cox model**
 
 ```{r, echo=TRUE}
 surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
@@ -460,20 +474,28 @@ surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
 summary(surv.model)
 ```
 
+<br>
+
+**Model 2 - Multivariable Cox model**
+
 To check if the multivariable cox model is better than a complex one (complete)
 
 ```{r}
 surv.model_full <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + er + size +
                       gradeF + menoF + hormonF + chemoF + recurF, data = cancer_df)
 
+summary(surv.model_full)
+```
+
+<br>
+
+**Comparison of models**
+
+```{r}
 # anova test
 anova(surv.model, surv.model_full)
 ```
 P-value is high which means we can use the reduced model.
-
-```{r}
-summary(surv.model_full)
-```
 
 Comparing univariate and multivariate via table
 
@@ -495,15 +517,9 @@ cancer_df %>%
 
 ```
 
+<br>
 
-### Hazard Ratio
-
-```{r, fig.align='center', fig.width=14, fig.height=10}
-ggforest(surv.model, data = cancer_df, fontsize = 1.1)
-```
-
-
-## V. Model Diagnostics
+**Model Diagnostics**
 
 Assess any violation of the proportionality assumption through statistical test based on Schoenfeld residuals.
 
@@ -523,6 +539,8 @@ ggcoxzph(stat.test)
 
 We can address these using stratification.
 
+**Model 3 - Stratified model**
+
 ```{r}
 surv.model.stratified <- coxph(Surv(dtime, death) ~ strata(age.group) + nodes.group + strata(pgr) + size +
                       gradeF + menoF + hormonF + recurF, data = cancer_df)
@@ -535,17 +553,33 @@ cox.zph(surv.model.stratified)
 ```
 The 'global` test for proportionality now shows a p-value above 0.05 which means the assumption is not violated. 
 
+<br>
 
-### Hazard Ratio
+**Hazard Ratio**
 
 ```{r, fig.align='center', fig.width=14, fig.height=10}
 attr(surv.model.stratified$terms, "dataClasses") <- attr(surv.model.stratified$terms, "dataClasses")[-c(1, 4)]
 ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.1)
 ```
+<br>
+<br>
+
+### V. Conclusion
 
 
 
 
+
+
+
+
+
+
+### Hazard Ratio
+
+```{r, fig.align='center', fig.width=14, fig.height=10}
+ggforest(surv.model, data = cancer_df, fontsize = 1.1)
+```
 
 
 
