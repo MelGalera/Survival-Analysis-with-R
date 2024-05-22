@@ -11,29 +11,36 @@ Melvin Galera
 
 **A. Data Collection**
 
-The dataset has 2982 observations and 15 variables:
+In this project, the in-built dataset “rotterdam” from the survival
+package in R was used. This dataset has 2982 records of patients with
+primary breast cancers available in the Rotterdam tumor bank. It has 15
+variables:
 
 - `pid` : patient identifier
 - `year` : year of surgery  
-- `age` : age at surgery
-- `meno` : menopausal status (0 = premenopausal, 1 = postmenopausal)
-- `size` : tumor size (factor with levels: \<=20, 20-50, 50\<)
-- `grade` : differentiation grade
-- `nodes` : number of lymph nodes
-- `pgr` :progesterone receptors (fmol/l)
-- `er` : estrogen receptors (fmol/l)
-- `hormon` : hormonal treatment (0 = no, 1 = yes)
-- `chemo` : chemotherapy
-- \`rtime\`\` : days to relapse or lost follow up
-- \`recur\`\` : 0 = no relapse, 1 = relapse
-- `dtime` : days to death or last follow up
-- `death` : 0 = alive, 1 = dead
+- `age` : patient’s age at surgery
+- `meno` : patient’s menopausal status (0 = premenopausal, 1 =
+  postmenopausal)
+- `size` : the range of tumor sizes (\<=20, 20-50, 50\<)
+- `grade` : differentiation grade of tumor
+- `nodes` : number of lymph nodes noted to be positive
+- `pgr` : biomarker of progesterone receptor (fmol/l)
+- `er` : biomarker of estrogen receptor (fmol/l)
+- `hormon` : indicates whether hormonal treatment was received or not (0
+  = no, 1 = yes)
+- `chemo` : indicates whether chemotherapy was received or not
+- \`rtime\`\` : days to relapse or lost-to-follow-up
+- \`recur\`\` : indicates whether the patient has had a recurrence or
+  not (0 = no relapse, 1 = relapse)
+- `dtime` : duration of survival or days to death or last follow up
+- `death` : indicates whether the patient is alive or not (0 = alive, 1
+  = dead)
 
-Initial look at the structure and content of `insurance_df` dataset:
+<br>
 
-``` r
-str(cancer_df)
-```
+**B. Data Exploration**
+
+An initial look at the structure of the dataset (`cancer_df`) shows:
 
     ## 'data.frame':    2982 obs. of  15 variables:
     ##  $ pid   : int  1 2 3 4 5 6 7 8 9 10 ...
@@ -52,9 +59,7 @@ str(cancer_df)
     ##  $ dtime : num  1799 2828 6012 2624 4915 ...
     ##  $ death : int  0 0 0 0 0 0 0 0 0 0 ...
 
-``` r
-cancer_df %>% head(10)
-```
+The first 10 records of `cancer_df`:
 
     ##      pid year age meno  size grade nodes pgr  er hormon chemo rtime recur dtime
     ## 1393   1 1992  74    1  <=20     3     0  35 291      0     0  1799     0  1799
@@ -79,10 +84,8 @@ cancer_df %>% head(10)
     ## 362      0
     ## 2182     0
 
-    ##    pid   year    age   meno   size  grade  nodes    pgr     er hormon  chemo 
-    ##      0      0      0      0      0      0      0      0      0      0      0 
-    ##  rtime  recur  dtime  death 
-    ##      0      0      0      0
+Summary statistics of the features are shown below. There are no missing
+data in each feature.
 
     ##       pid              year           age             meno         size     
     ##  Min.   :   1.0   Min.   :1978   Min.   :24.00   Min.   :0.00   <=20 :1387  
@@ -113,15 +116,21 @@ cancer_df %>% head(10)
     ##  3rd Qu.:3555   3rd Qu.:1.0000  
     ##  Max.   :7043   Max.   :1.0000
 
-**B. Data Exploration**
-
-To perform EDA on the dataset, we perform univariate distribution of the
-variables and the bivariate and multivariate relationships among the
-variables.
+<br>
 
 **Univariate plots**
 
-<img src="index_files/figure-gfm/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<br>
+
+<img src="index_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<br>
+
+<img src="index_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<br>
+
+<img src="index_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<br>
 
 Group some predictors: Age (“24-60”, “61-90”) and Nodes (0-10, 11-20,
 20+) It is also better to factor other predictors such. as Grade, Meno,
@@ -197,15 +206,15 @@ censored/alive, 1= dead) dtime: days until event or censoring
 
 Model 1
 
-<img src="index_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 Survival data representation using triplet (entry age, exit age, event)
 
-<img src="index_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
 
 Survival data representation using triplet (follow up time, event)
 
-<img src="index_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
 <br> <br>
 
@@ -219,7 +228,7 @@ Model 1: OVERALL FIRST
 mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 ```
 
-<img src="index_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
 
     ##   strata median lower upper
     ## 1    All   4033  3888  4309
@@ -263,7 +272,7 @@ survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_ho
 arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
 ```
 
-<img src="index_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
 <br>
 
 **B. Log Rank test**
@@ -676,7 +685,7 @@ the ‘GLOBAL’ test.
 
 Plot of Schoenfeld residuals against `dtime`.
 
-<img src="index_files/figure-gfm/unnamed-chunk-23-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
 
 We can address these using stratification.
 
@@ -735,11 +744,11 @@ which means the assumption is not violated.
 
 **Hazard Ratio**
 
-<img src="index_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
 <br> <br>
 
 ### V. Conclusion
 
 ### Hazard Ratio
 
-<img src="index_files/figure-gfm/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />

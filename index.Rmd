@@ -37,73 +37,92 @@ cancer_df <-survival::rotterdam
 
 **A. Data Collection**
 
-The dataset has 2982 observations and 15 variables:
+In this project, the in-built dataset "rotterdam" from the survival package in R was used. This dataset has 2982 records of patients with primary breast cancers available in the Rotterdam tumor bank. It has 15 variables:
 
   * `pid`     : patient identifier
   * `year`    : year of surgery   
-  * `age`     : age at surgery
-  * `meno`    : menopausal status (0 = premenopausal, 1 = postmenopausal)
-  * `size`    : tumor size (factor with levels: <=20, 20-50,  50<)
-  * `grade`   : differentiation grade
-  * `nodes`   : number of lymph nodes
-  * `pgr`     :progesterone receptors (fmol/l)
-  * `er`      : estrogen receptors (fmol/l)
-  * `hormon`  : hormonal treatment (0 = no, 1 = yes)
-  * `chemo`   : chemotherapy 
-  * `rtime``  : days to relapse or lost follow up
-  * `recur``  : 0 = no relapse, 1 = relapse
-  * `dtime`   :  days to death or last follow up
-  * `death`   : 0 = alive, 1 = dead
+  * `age`     : patient's age at surgery
+  * `meno`    : patient's menopausal status (0 = premenopausal, 1 = postmenopausal)
+  * `size`    : the range of tumor sizes (<=20, 20-50,  50<)
+  * `grade`   : differentiation grade of tumor
+  * `nodes`   : number of lymph nodes noted to be positive
+  * `pgr`     : biomarker of progesterone receptor (fmol/l)
+  * `er`      : biomarker of estrogen receptor (fmol/l)
+  * `hormon`  : indicates whether hormonal treatment was received or not (0 = no, 1 = yes)
+  * `chemo`   : indicates whether chemotherapy was received or not 
+  * `rtime``  : days to relapse or lost-to-follow-up
+  * `recur``  : indicates whether the patient has had a recurrence or not (0 = no relapse, 1 = relapse)
+  * `dtime`   : duration of survival or days to death or last follow up
+  * `death`   : indicates whether the patient is alive or not (0 = alive, 1 = dead)
   
-
-Initial look at the structure and content of `insurance_df` dataset:
-
-```{r, echo=TRUE}
-str(cancer_df)
-cancer_df %>% head(10)
-
-```
-```{r}
-# check for missing data
-colSums(is.na(cancer_df))
-summary(cancer_df)
-```
+<br>
 
 **B. Data Exploration**
 
-To perform EDA on the dataset, we perform univariate distribution of the variables and the bivariate and multivariate relationships among the variables.
+An initial look at the structure of the dataset (`cancer_df`) shows:
 
+```{r}
+str(cancer_df)
+```
+The first 10 records of `cancer_df`:
+
+```{r}
+cancer_df %>% head(10)
+```
+
+```{r, include=FALSE}
+# check for missing data
+colSums(is.na(cancer_df))
+```
+
+Summary statistics of the features are shown below. There are no missing data in each feature.
+
+```{r}
+summary(cancer_df)
+```
+
+<br>
 
 **Univariate plots**
 
-```{r, fig.align='center', fig.width=13, fig.height=8}
+```{r, fig.align='center', fig.width=15, fig.height=4}
 
 p1_age <- ggplot(data = cancer_df, aes(x = age)) +
-  geom_histogram(binwidth= 7, color= "skyblue1", fill = "slateblue3") +
+  geom_histogram(binwidth= 7, color= "slateblue1", fill = "slateblue3") +
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Age",
        y = "Count",
        title = "Age distribution")
 
 p2_nodes <- ggplot(data = cancer_df, aes(x = nodes)) +
-  geom_histogram(binwidth= 3, color= "skyblue1", fill = "slateblue3") +
+  geom_histogram(binwidth= 3, color= "slateblue1", fill = "slateblue3") +
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Nodes",
        y = "Count",
        title = "Nodes distribution")
 
 p3_pgr <- ggplot(data = cancer_df, aes(x = pgr)) +
-  geom_histogram(binwidth= 420, color= "skyblue1", fill = "slateblue3") +
+  geom_histogram(binwidth= 420, color= "slateblue1", fill = "slateblue3") +
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "pgr",
        y = "Count",
        title = "pgr distribution")
 
+ggarrange(p1_age, p2_nodes, p3_pgr, ncol =3)
+```
+<br>
+
+```{r, fig.align='center', fig.width=15, fig.height=4}
+
 p4_er <- ggplot(data = cancer_df, aes(x = er)) +
-  geom_histogram(binwidth= 300, color= "skyblue1", fill = "slateblue3") +
+  geom_histogram(binwidth= 300, color= "slateblue1", fill = "slateblue3") +
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "er",
        y = "Count",
        title = "er distribution")
 
 p5_size <- ggplot(data = cancer_df, aes(x = size)) +
-  geom_bar(width = 0.7, color= "skyblue1", fill = "slateblue3") +
+  geom_bar(width = 0.7, color= "slateblue1", fill = "slateblue3") +
   geom_text(data = . %>% 
               group_by(size) %>% 
               tally() %>% 
@@ -111,13 +130,14 @@ p5_size <- ggplot(data = cancer_df, aes(x = size)) +
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Size",
        y = "Count",
        title = "Size distribution")
 
 p6_grade <- ggplot(data = cancer_df, aes(x = factor(grade))) +
-  geom_bar(width = 0.7, color= "skyblue1", fill = "slateblue3") +
+  geom_bar(width = 0.7, color= "slateblue1", fill = "slateblue3") +
   geom_text(data = . %>% 
               group_by(grade) %>% 
               tally() %>% 
@@ -125,16 +145,24 @@ p6_grade <- ggplot(data = cancer_df, aes(x = factor(grade))) +
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Grade",
        y = "Count",
        title = "Grade distribution")
+
+ggarrange(p4_er, p5_size, p6_grade, ncol =3)
+
+```
+<br>
+
+```{r, fig.align='center', fig.width=15, fig.height=4}
 
 p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), fill = factor(meno))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
   scale_fill_manual(values = c("slateblue3", "peru")) +
-  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  scale_color_manual(values = c("slateblue1", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(meno) %>% 
               tally() %>% 
@@ -142,7 +170,8 @@ p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), 
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   theme(legend.position = "none") +
   labs(x = "Meno",
        y = "Count",
@@ -153,7 +182,7 @@ p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hor
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
   scale_fill_manual(values = c("slateblue3", "peru")) +
-  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  scale_color_manual(values = c("slateblue1", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(hormon) %>% 
               tally() %>% 
@@ -161,7 +190,8 @@ p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hor
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   theme(legend.position = "none") +
   labs(x = "Hormon",
        y = "Count",
@@ -171,7 +201,7 @@ p9_chemo <- ggplot(data = cancer_df, aes(x = factor(chemo), color = factor(chemo
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
   scale_fill_manual(values = c("slateblue3", "peru")) +
-  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  scale_color_manual(values = c("slateblue1", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(chemo) %>% 
               tally() %>% 
@@ -179,17 +209,25 @@ p9_chemo <- ggplot(data = cancer_df, aes(x = factor(chemo), color = factor(chemo
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   theme(legend.position = "none") +
   labs(x = "Chemo",
        y = "Count",
        title = "Chemo distribution")
 
+ggarrange(p7_meno, p8_hormon, p9_chemo, ncol = 3)
+
+```
+<br>
+
+```{r, fig.align='center', fig.width=15, fig.height=4}
+
 p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recur), fill = factor(recur))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
   scale_fill_manual(values = c("slateblue3", "peru")) +
-  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  scale_color_manual(values = c("slateblue1", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(recur) %>% 
               tally() %>% 
@@ -197,7 +235,8 @@ p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recu
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   theme(legend.position = "none") +
   labs(x = "Recur",
        y = "Count",
@@ -207,7 +246,7 @@ p11_death <- ggplot(data = cancer_df, aes(x = factor(death), color = factor(deat
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
   scale_fill_manual(values = c("slateblue3", "peru")) +
-  scale_color_manual(values = c("skyblue1", "goldenrod2")) +
+  scale_color_manual(values = c("slateblue1", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(death) %>% 
               tally() %>% 
@@ -215,17 +254,17 @@ p11_death <- ggplot(data = cancer_df, aes(x = factor(death), color = factor(deat
               ungroup(),
             aes(y = n, label = scales::percent(prop)),
             position = position_stack(vjust=0.5),
-            colour = "white", size = 4)+
+            colour = "white", size = 5)+
+  theme(plot.title = element_text(size = 15), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   theme(legend.position = "none") +
   labs(x = "Death",
        y = "Count",
        title = "Death distribution")
 
-ggarrange(p1_age, p2_nodes, p3_pgr, p4_er, 
-          p5_size, p6_grade, p7_meno, p8_hormon, 
-          p9_chemo, p10_recur, p11_death,  ncol =4, nrow = 3)
+ggarrange(p10_recur, p11_death,  ncol = 3)
 
 ```
+<br>
 
 Group some predictors: Age ("24-60", "61-90") and  Nodes (0-10, 11-20, 20+)
 It is also better to factor other predictors such. as Grade, Meno, Hormon, Chemo, Recur and death
