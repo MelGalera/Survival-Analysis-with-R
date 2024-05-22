@@ -137,7 +137,7 @@ variables.
 
 ### A. Univariate Analysis
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 Group some predictors: Age (“24-60”, “61-90”) and Nodes (0-10, 11-20,
 20+) It is also better to factor other predictors such. as Grade, Meno,
@@ -211,15 +211,15 @@ censored/alive, 1= dead) dtime: days until event or censoring
 
 Model 1
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 Survival data representation using triplet (entry age, exit age, event)
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 Survival data representation using triplet (follow up time, event)
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ## III. Kaplan-Meier Survival Curves and Log-Rank Tests
 
@@ -231,7 +231,7 @@ Model 1: OVERALL FIRST
 mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 ```
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
     ##   strata median lower upper
     ## 1    All   4033  3888  4309
@@ -275,7 +275,7 @@ survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_ho
 arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
 ```
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 B. Log Rank test
 
 By using log rank test, we can test if there is difference in the
@@ -644,7 +644,7 @@ Comparing univariate and multivariate via table
 
 ### Hazard Ratio
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
 ## V. Model Diagnostics
 
@@ -674,7 +674,7 @@ the ‘GLOBAL’ test.
 
 Plot of Schoenfeld residuals against `dtime`.
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
 
 We can address these using stratification.
 
@@ -729,4 +729,4 @@ which means the assumption is not violated.
 
 ### Hazard Ratio
 
-<img src="SurvivalAnalysis_cancer_files/figure-gfm/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
