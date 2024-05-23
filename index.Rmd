@@ -495,7 +495,7 @@ sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)
 
 ### IV. Cox proportional hazard regression models
 
-Cox regression is used for modelling time-to-event data to relate the outcome (survival duration or `dtime`) to one or more covariates. It estimates **hazard ratios** which describe, in this analysis, the relative probability of `death` occuring at `dtime`, given that `death` hasn't happened up until time `dtime`.  
+Cox regression is used for modelling time-to-event data to relate the outcome (survival duration or `dtime`) to one or more covariates.   
 
 For this anaysis, three Cox regression models were evaluated
 
@@ -561,7 +561,7 @@ ggcoxzph(stat.test)
 
 **Model 3 - Stratified model**
 
-
+This model fits a Cox regression model that attempts to resolve the violation of proportionality assumption of Model 1 by stratification, i.e., splitting the data of violating covariates (`age.group` and `pgr`) into groups termed strata.  
 
 ```{r}
 surv.model.stratified <- coxph(Surv(dtime, death) ~ strata(age.group) + nodes.group + strata(pgr) + size +
@@ -570,19 +570,38 @@ surv.model.stratified <- coxph(Surv(dtime, death) ~ strata(age.group) + nodes.gr
 summary(surv.model.stratified)
 ```
 
+<br>
+
+Result of the statistical test as shown below (all p-values >0.05) confirmed that the Model 3 resolves the violation and selected as the  best-fitting model.  
+
 ```{r, echo=TRUE}
 cox.zph(surv.model.stratified)
 ```
-The 'global` test for proportionality now shows a p-value above 0.05 which means the assumption is not violated. 
-
 <br>
 
 **Hazard Ratio**
+
+The Cox regression model gives estimates of the  **hazard ratios**. The hazard rate describes, in this analysis, the relative probability of `death` occuring at `dtime`, given that `death` hasn't happened up until time `dtime`. 
+
+The figure below shows the forest plot for Model 3 presenting the hazard ratios of the covariates for breast cancer patients in the dataset. 
 
 ```{r, fig.align='center', fig.width=14, fig.height=10}
 attr(surv.model.stratified$terms, "dataClasses") <- attr(surv.model.stratified$terms, "dataClasses")[-c(1, 4)]
 ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.1)
 ```
+
+The following can be interpreted:
+
+* In general, every hazard ratio (HR) represents a relative risk of death that compares one of the categories of the covariate to the baseline “reference”. A HR <1 means that there is a decreased hazard (or risk) of death (the outcome event) and a HR >1 means that there is an increased hazard (or risk) of death, relative to the reference. Hence, this also implies that if the 95% confidence interval for HR include the value ‘1’, it means that the resulting p-value will be high (> 0.05) which would mean that the difference to the baseline “reference” is not significant. This is true for `nodes.group` 21-34 category, `gradeF` grade 3 category, and `hormonF` Yes category.
+
+* In terms of number of positive lymph nodes (`nodes.group`): After adjusting to other variables, the hazard of dying is 79% higher for patients with 11-20 positive nodes compared to those with 0-10 positive nodes (HR = 1.79, 95% CI: 1.4-2.3).
+
+* In terms of tumor size range (`size`): After adjusting to other variables, the hazard of dying is 52% higher for patients with tumor size range of 20-50 compared to those with tumor size range of <= 20 (HR = 1.52, 95% CI: 1.29-1.8). The hazard of dying is 124% higher for patients with tumor size range of >= 50 compared to those with tumor size range of <= 20 (HR = 2.24, 95% CI: 1.78-2.8).
+
+* In terms of patient's menopausal status (`menoF`): After adjusting to other variables, the hazard of dying is 23% higher for patients postmenopausal (1-Yes) compared to those premenopausal (0-No) (HR = 1.23, 95% CI: 1.01-1.5).
+
+* In terms of whether the patient had a recurrence or not (`recurF`): After adjusting to other variables, the hazard of dying is very high, about 888% higher (almost 9x higher) for who had relapse compared to those who did not (HR = 9.88, 95% CI: 7.94-12.3).
+
 <br>
 <br>
 
@@ -591,37 +610,6 @@ ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.1)
 
 
 
-
-
-
-
-
-
-### Hazard Ratio
-
-```{r, fig.align='center', fig.width=14, fig.height=10}
-ggforest(surv.model, data = cancer_df, fontsize = 1.1)
-```
-
-
-
-```{r}
-# create comparison table
-mykable <- function(x){
-  knitr::kable(x, row.names = FALSE, align = c("l", "l", "r", "r", "r", "r", "r", "r", "r"))
-}
-
-dependent_os <- "Surv(dtime, death)"
-
-explanatory <- c("age.group", "nodes.group", "pgr", "er", "size", "gradeF", "menoF", "hormonF", "chemoF", "recurF")
-explanatory_multi <- c("age.group", "nodes.group", "pgr", "size", "gradeF", "menoF", "hormonF", "recurF")
-
-# create table
-cancer_df %>% 
-  finalfit.coxph(dependent_os, explanatory, explanatory_multi) %>% 
-  mykable()
-
-```
 
 
 

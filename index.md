@@ -455,10 +455,7 @@ The survival curves have statistically significant differences.
 ### IV. Cox proportional hazard regression models
 
 Cox regression is used for modelling time-to-event data to relate the
-outcome (survival duration or `dtime`) to one or more covariates. It
-estimates **hazard ratios** which describe, in this analysis, the
-relative probability of `death` occuring at `dtime`, given that `death`
-hasn’t happened up until time `dtime`.
+outcome (survival duration or `dtime`) to one or more covariates.
 
 For this anaysis, three Cox regression models were evaluated
 
@@ -631,6 +628,11 @@ shown below:
 
 **Model 3 - Stratified model**
 
+This model fits a Cox regression model that attempts to resolve the
+violation of proportionality assumption of Model 1 by stratification,
+i.e., splitting the data of violating covariates (`age.group` and `pgr`)
+into groups termed strata.
+
     ## Call:
     ## coxph(formula = Surv(dtime, death) ~ strata(age.group) + nodes.group + 
     ##     strata(pgr) + size + gradeF + menoF + hormonF + recurF, data = cancer_df)
@@ -664,6 +666,12 @@ shown below:
     ## Wald test            = 547.6  on 8 df,   p=<2e-16
     ## Score (logrank) test = 781.9  on 8 df,   p=<2e-16
 
+<br>
+
+Result of the statistical test as shown below (all p-values \>0.05)
+confirmed that the Model 3 resolves the violation and selected as the
+best-fitting model.
+
 ``` r
 cox.zph(surv.model.stratified)
 ```
@@ -677,41 +685,55 @@ cox.zph(surv.model.stratified)
     ## recurF      0.02358  1 0.88
     ## GLOBAL      9.03427  8 0.34
 
-The ’global\` test for proportionality now shows a p-value above 0.05
-which means the assumption is not violated.
-
 <br>
 
 **Hazard Ratio**
 
+The Cox regression model gives estimates of the **hazard ratios**. The
+hazard rate describes, in this analysis, the relative probability of
+`death` occuring at `dtime`, given that `death` hasn’t happened up until
+time `dtime`.
+
+The figure below shows the forest plot for Model 3 presenting the hazard
+ratios of the covariates for breast cancer patients in the dataset.
+
 <img src="index_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
+
+The following can be interpreted:
+
+- In general, every hazard ratio (HR) represents a relative risk of
+  death that compares one of the categories of the covariate to the
+  baseline “reference”. A HR \<1 means that there is a decreased hazard
+  (or risk) of death (the outcome event) and a HR \>1 means that there
+  is an increased hazard (or risk) of death, relative to the reference.
+  Hence, this also implies that if the 95% confidence interval for HR
+  include the value ‘1’, it means that the resulting p-value will be
+  high (\> 0.05) which would mean that the difference to the baseline
+  “reference” is not significant. This is true for `nodes.group` 21-34
+  category, `gradeF` grade 3 category, and `hormonF` Yes category.
+
+- In terms of number of positive lymph nodes (`nodes.group`): After
+  adjusting to other variables, the hazard of dying is 79% higher for
+  patients with 11-20 positive nodes compared to those with 0-10
+  positive nodes (HR = 1.79, 95% CI: 1.4-2.3).
+
+- In terms of tumor size range (`size`): After adjusting to other
+  variables, the hazard of dying is 52% higher for patients with tumor
+  size range of 20-50 compared to those with tumor size range of \<= 20
+  (HR = 1.52, 95% CI: 1.29-1.8). The hazard of dying is 124% higher for
+  patients with tumor size range of \>= 50 compared to those with tumor
+  size range of \<= 20 (HR = 2.24, 95% CI: 1.78-2.8).
+
+- In terms of patient’s menopausal status (`menoF`): After adjusting to
+  other variables, the hazard of dying is 23% higher for patients
+  postmenopausal (1-Yes) compared to those premenopausal (0-No) (HR =
+  1.23, 95% CI: 1.01-1.5).
+
+- In terms of whether the patient had a recurrence or not (`recurF`):
+  After adjusting to other variables, the hazard of dying is very high,
+  about 888% higher (almost 9x higher) for who had relapse compared to
+  those who did not (HR = 9.88, 95% CI: 7.94-12.3).
+
 <br> <br>
 
 ### V. Conclusion
-
-### Hazard Ratio
-
-<img src="index_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
-
-| Dependent: Surv(dtime, death) |           |           all |           HR (univariable) |         HR (multivariable) |
-|:------------------------------|:----------|--------------:|---------------------------:|---------------------------:|
-| age.group                     | 24-60     |   1907 (64.0) |                         \- |                         \- |
-|                               | 61-90     |   1075 (36.0) | 1.51 (1.35-1.69, p\<0.001) |  1.25 (1.08-1.45, p=0.004) |
-| nodes.group                   | 0-10      |   2770 (92.9) |                         \- |                         \- |
-|                               | 11-20     |     190 (6.4) | 3.36 (2.83-4.00, p\<0.001) | 1.68 (1.40-2.01, p\<0.001) |
-|                               | 21-34     |      22 (0.7) |  2.34 (1.40-3.89, p=0.001) |  1.05 (0.63-1.75, p=0.859) |
-| pgr                           | Mean (SD) | 161.8 (291.3) | 1.00 (1.00-1.00, p\<0.001) | 1.00 (1.00-1.00, p\<0.001) |
-| er                            | Mean (SD) | 166.6 (272.5) |  1.00 (1.00-1.00, p=0.440) |                         \- |
-| size                          | \<=20     |   1387 (46.5) |                         \- |                         \- |
-|                               | 20-50     |   1291 (43.3) | 1.95 (1.73-2.21, p\<0.001) | 1.53 (1.35-1.73, p\<0.001) |
-|                               | \>50      |    304 (10.2) | 3.74 (3.17-4.42, p\<0.001) | 2.30 (1.94-2.73, p\<0.001) |
-| gradeF                        | 2         |    794 (26.6) |                         \- |                         \- |
-|                               | 3         |   2188 (73.4) | 1.66 (1.45-1.90, p\<0.001) |  1.21 (1.05-1.39, p=0.007) |
-| menoF                         | No        |   1312 (44.0) |                         \- |                         \- |
-|                               | Yes       |   1670 (56.0) | 1.54 (1.37-1.72, p\<0.001) |  1.27 (1.09-1.49, p=0.002) |
-| hormonF                       | No        |   2643 (88.6) |                         \- |                         \- |
-|                               | Yes       |    339 (11.4) | 1.51 (1.28-1.79, p\<0.001) |  1.06 (0.89-1.26, p=0.547) |
-| chemoF                        | No        |   2402 (80.5) |                         \- |                         \- |
-|                               | Yes       |    580 (19.5) |  1.05 (0.92-1.20, p=0.482) |                         \- |
-| recurF                        | No        |   1464 (49.1) |                         \- |                         \- |
-|                               | Yes       |   1518 (50.9) | 7.68 (6.59-8.95, p\<0.001) | 6.94 (5.94-8.10, p\<0.001) |
