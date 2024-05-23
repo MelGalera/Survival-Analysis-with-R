@@ -75,10 +75,52 @@ cancer_df %>% head(10)
 colSums(is.na(cancer_df))
 ```
 
-Summary statistics of the features are shown below. There are no missing data in each feature.
+```{r}
+age.breaks <- c(24, 61, 91)
+age.tags <- c("24-60", "61-90")
+cancer_df$age.group <- cut(cancer_df$age, breaks = age.breaks,
+                           include.lowest = TRUE,
+                           right = FALSE,
+                           labels = age.tags)
+
+nodes.breaks <- c(0, 11, 21, 35)
+nodes.tags <- c("0-10", "11-20", "21-34")
+cancer_df$nodes.group <- cut(cancer_df$nodes, breaks = nodes.breaks,
+                           include.lowest = TRUE,
+                           right = FALSE,
+                           labels = nodes.tags)
+```
+
 
 ```{r}
-summary(cancer_df)
+cancer_df <- cancer_df %>% 
+  mutate(
+    gradeF = factor(grade),
+    menoF = factor(meno, labels = c("No", "Yes")), 
+    hormonF = factor(hormon, labels = c("No", "Yes")), 
+    chemoF = factor(chemo, labels = c("No", "Yes")),
+    recurF = factor(recur, labels = c("No", "Yes")),
+    deathF = factor(death, labels = c("No", "Yes"))
+  )
+```
+
+<br>
+
+Values of some features were grouped as factors. The feature `age` was factored as `age.group` with levels "24-60" and "61-90".  The feature `nodes` was factored as `nodes.group` with levels "0-10", "11-20", and "21-34". Other features such as `grade`, `meno`, `hormon`, `chemo`, `recur`, and `death` were also factored into levels "no" and "yes" (see the 'F' added in the names to indicate factored).
+
+Summary statistics of the resulting relevant features are shown below. There are no missing data in each feature.
+
+```{r}
+cancer_df_stat <- cancer_df %>% 
+  select(-c(pid, grade, meno, hormon, chemo, recur, death))
+
+summary(cancer_df_stat %>% select(year, age, age.group, nodes, nodes.group))
+```
+```{r}
+summary(cancer_df_stat %>% select(pgr, er, size, gradeF, menoF))
+```
+```{r}
+summary(cancer_df_stat %>% select(hormonF, chemoF, recurF, deathF))
 ```
 
 <br>
@@ -266,43 +308,6 @@ ggarrange(p10_recur, p11_death,  ncol = 3)
 ```
 <br>
 
-Group some predictors: Age ("24-60", "61-90") and  Nodes (0-10, 11-20, 20+)
-It is also better to factor other predictors such. as Grade, Meno, Hormon, Chemo, Recur and death
-
-```{r}
-age.breaks <- c(24, 61, 91)
-age.tags <- c("24-60", "61-90")
-cancer_df$age.group <- cut(cancer_df$age, breaks = age.breaks,
-                           include.lowest = TRUE,
-                           right = FALSE,
-                           labels = age.tags)
-
-nodes.breaks <- c(0, 11, 21, 35)
-nodes.tags <- c("0-10", "11-20", "21-34")
-cancer_df$nodes.group <- cut(cancer_df$nodes, breaks = nodes.breaks,
-                           include.lowest = TRUE,
-                           right = FALSE,
-                           labels = nodes.tags)
-```
-
-
-```{r}
-cancer_df <- cancer_df %>% 
-  mutate(
-    gradeF = factor(grade),
-    menoF = factor(meno, labels = c("No", "Yes")), 
-    hormonF = factor(hormon, labels = c("No", "Yes")), 
-    chemoF = factor(chemo, labels = c("No", "Yes")),
-    recurF = factor(recur, labels = c("No", "Yes")),
-    deathF = factor(death, labels = c("No", "Yes"))
-  )
-```
-
-```{r}
-str(cancer_df)
-summary(cancer_df)
-```
-
 
 Fit model for overall survival
   death: censoring status (0= censored/alive, 1= dead)
@@ -310,10 +315,12 @@ Fit model for overall survival
 
 <br>
 
-**Censoring**
 
-Model 1
+**Survival data representations and censoring**
 
+In survival analysis, the interest is on analyzing data where the outcome variable is time to an event, measured from a defined starting point. In this analysis, the outcome variable is `dtime` which is the duration of survival or the days to death or last follow-up of breast cancer patients. The event of interest is death as indicated by the variable `death` (class 1/yes - dead) and the starting point is the patient's surgery indicated by the year of surgery (`year`)and age of patient at surgery (`age`).  
+
+The figure below shows a histogram of `dtime` and count of patients based on `death` status for the study period.
 
 ```{r, fig.align="center", fig.width=10, fig.height=4}
 hist_01 <- ggplot(cancer_df, aes(dtime)) +
@@ -324,10 +331,11 @@ hist_01 <- ggplot(cancer_df, aes(dtime)) +
 
 hist_01
 ```
+<br>
 
+In the dataset, censoring occurs when information about a patient's survival is incomplete based on the available data. Since there is no missing value in the `year`, it can be said that there can be right censoring in the dataset, i.e., some patients may not have died  by the end of study period (alive), some patients might have been lost to follow up or have died after the study period (censored). These can be seen in the graphical representations of survival data below.
 
-
-Survival data representation using triplet (entry age, exit age, event)
+The figure below shows survival data of randomly selected 30 breast cancer patients from the dataset. The survival data is represented using the triplet - entry age, exit age, event. From the starting point which was the `age` at surgery, the patient was followed until they experience the event (death) or they are censored. If the patient had a recurrence (1-relapse) within the study period, it is marked marked by a 'purple' dot.   
 
 ```{r, fig.align="center", fig.width= 10, fig.height=6}
 set.seed(300)
@@ -351,8 +359,9 @@ ggplot(data=cancer_df_sample) +
 
 ```
 
+<br>
 
-Survival data representation using triplet (follow up time, event)
+Another way to present survival data of the 30 sampled patients is using the pair: follow-up (survival) time, event. This is shown in the figure below.
 
 ```{r, fig.align="center", fig.width= 10, fig.height=6}
 
@@ -372,19 +381,20 @@ ggplot(data=cancer_df_sample) +
 <br>
 <br>
 
-### III. Kaplan-Meier Survival Curves and Log-Rank Tests
+### III. Kaplan-Meier Survival Curves and Log Rank Tests
 
 **A. Kaplan-Meier Curves**
 
-Model 1: OVERALL FIRST
+Kaplan- Meier curves are non-parametric summary of the probability of survival past a certain time. The KM survival curve of the breast cancer patients from the dataset is shown below:
+
 ```{r, echo=TRUE}
 mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 ```
 
-```{r, fig.align="center", fig.width= 8, fig.height= 4}
+```{r, fig.align="center", fig.width= 9, fig.height= 4}
 ggsurvplot(mod01_sfit, 
            conf.int = TRUE,
-           risk.table = TRUE, fontsize = 3.5,
+           risk.table = TRUE, fontsize = 4,
            risk.table.col = "strata",
            linetype = "strata",
            xlim = c(0, 7043),
@@ -392,18 +402,19 @@ ggsurvplot(mod01_sfit,
            ggtheme = theme_bw(), 
            palette = "dodgerblue2")
 ```
-
 ```{r}
 surv_median(mod01_sfit)
 ```
+The median survival time for the breast cancer patients in the dataset is 4033 days.
 
 ```{r}
 summary(mod01_sfit, times = 1825)
 ```
+<br>
 
-Generate KM curves for explanatory variables:
+Separate KM curves can also be plotted and compared for different variables to explore if different values/levels of the variables affect survival probabilities. Below are the KM curves for the features `age.group`, `menoF`, `nodes.group`, `hormonF`, `size`, `chemoF`, `gradeF`, and `recurF`.
 
-```{r, echo=TRUE, fig.align="center", fig.width= 14, fig.height= 18}
+```{r, echo=FALSE, fig.align="center", fig.width= 14, fig.height= 18}
 m1_age <- survfit(Surv(dtime, death) ~ age.group, data = cancer_df)
 m1_nodes <- survfit(Surv(dtime, death) ~ nodes.group, data = cancer_df)
 m1_pgr <- survfit(Surv(dtime, death) ~ pgr, data = cancer_df)
@@ -423,7 +434,7 @@ titlelist <- list("Age", "Nodes", "pgr", "er", "Size", "Grade", "Meno", "Hormon"
 
 survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_hormon, m1_chemo, m1_recur),
            pval = TRUE, pval.method = TRUE, conf.int = TRUE,
-           risk.table = TRUE, fontsize = 4,
+           risk.table = TRUE, fontsize = 5,
            risk.table.col = "strata",
            linetype = "strata",
            xlim = c(0, 7043),
@@ -439,20 +450,18 @@ arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
 
 **B. Log Rank test**
 
-By using log rank test, we can test if there is difference in the ssurvival cureves of the categories/predictors.
-
-Null hypothesis, Ho: the survival curves are equal
-Alternate hypothesis, Ha: the survival curves are different for at least some intervals
-
-Use `coxph` function.
+Log rank test was used to determine if differences in the survival curves of each feature/variable were significant. For instance, using the log rank test for `gradeF`:
 
 ```{r, echo=TRUE}
-log.rank.recur <- coxph(Surv(dtime, death) ~ recurF, data = cancer_df)
-summary(log.rank.recur)
+log.rank.grade <- coxph(Surv(dtime, death) ~ gradeF, data = cancer_df)
+summary(log.rank.grade)
 ```
 
-The score for the log-rank test for recur is 945.9 with very low p-value. This means we reject the null hypothesis that the survival curves for recur are the same (as visually shown in KM curve)
+The result shows that the difference between the survival curves are significant (low p-value). The median survival time for those who have tumor differentiation grade 2 was 5653 days while 3700 days for those with tumor grade 3 (shown below and also in the KM curve).
 
+```{r}
+surv_median(m1_grade )
+```
 
 ```{r, results='hide'}
 # create a comparison table
@@ -481,10 +490,9 @@ results.df <- results.trans %>%
                          "The survival curves have statistically non-significant differences")) %>% 
   print()
 ```
-
 <br>
 
-Table __. Log-rank test scores an dp-value for all covariates
+The table below shows a summary of the log rank test results performed on the features. The features `er` (estrogen receptor biomarker) and `chemoF` (indicator of whether the patient received chemotherapy) both have KM survival curves that have statistically non-significant firrences. 
 
 ```{r}
 sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)

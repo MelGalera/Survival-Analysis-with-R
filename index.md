@@ -84,237 +84,185 @@ The first 10 records of `cancer_df`:
     ## 362      0
     ## 2182     0
 
-Summary statistics of the features are shown below. There are no missing
-data in each feature.
+<br>
 
-    ##       pid              year           age             meno         size     
-    ##  Min.   :   1.0   Min.   :1978   Min.   :24.00   Min.   :0.00   <=20 :1387  
-    ##  1st Qu.: 753.2   1st Qu.:1986   1st Qu.:45.00   1st Qu.:0.00   20-50:1291  
-    ##  Median :1504.5   Median :1988   Median :54.00   Median :1.00   >50  : 304  
-    ##  Mean   :1505.0   Mean   :1988   Mean   :55.06   Mean   :0.56               
-    ##  3rd Qu.:2254.8   3rd Qu.:1990   3rd Qu.:65.00   3rd Qu.:1.00               
-    ##  Max.   :3007.0   Max.   :1993   Max.   :90.00   Max.   :1.00               
-    ##      grade           nodes             pgr               er        
-    ##  Min.   :2.000   Min.   : 0.000   Min.   :   0.0   Min.   :   0.0  
-    ##  1st Qu.:2.000   1st Qu.: 0.000   1st Qu.:   4.0   1st Qu.:  11.0  
-    ##  Median :3.000   Median : 1.000   Median :  41.0   Median :  61.0  
-    ##  Mean   :2.734   Mean   : 2.712   Mean   : 161.8   Mean   : 166.6  
-    ##  3rd Qu.:3.000   3rd Qu.: 4.000   3rd Qu.: 198.0   3rd Qu.: 202.8  
-    ##  Max.   :3.000   Max.   :34.000   Max.   :5004.0   Max.   :3275.0  
-    ##      hormon           chemo            rtime            recur       
-    ##  Min.   :0.0000   Min.   :0.0000   Min.   :  36.0   Min.   :0.0000  
-    ##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.: 823.5   1st Qu.:0.0000  
-    ##  Median :0.0000   Median :0.0000   Median :1940.0   Median :1.0000  
-    ##  Mean   :0.1137   Mean   :0.1945   Mean   :2097.9   Mean   :0.5091  
-    ##  3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:3198.8   3rd Qu.:1.0000  
-    ##  Max.   :1.0000   Max.   :1.0000   Max.   :7043.0   Max.   :1.0000  
-    ##      dtime          death       
-    ##  Min.   :  36   Min.   :0.0000  
-    ##  1st Qu.:1607   1st Qu.:0.0000  
-    ##  Median :2638   Median :0.0000  
-    ##  Mean   :2605   Mean   :0.4266  
-    ##  3rd Qu.:3555   3rd Qu.:1.0000  
-    ##  Max.   :7043   Max.   :1.0000
+Values of some features were grouped as factors. The feature `age` was
+factored as `age.group` with levels “24-60” and “61-90”. The feature
+`nodes` was factored as `nodes.group` with levels “0-10”, “11-20”, and
+“21-34”. Other features such as `grade`, `meno`, `hormon`, `chemo`,
+`recur`, and `death` were also factored into levels “no” and “yes” (see
+the ‘F’ added in the names to indicate factored).
+
+Summary statistics of the resulting relevant features are shown below.
+There are no missing data in each feature.
+
+    ##       year           age        age.group        nodes        nodes.group 
+    ##  Min.   :1978   Min.   :24.00   24-60:1907   Min.   : 0.000   0-10 :2770  
+    ##  1st Qu.:1986   1st Qu.:45.00   61-90:1075   1st Qu.: 0.000   11-20: 190  
+    ##  Median :1988   Median :54.00                Median : 1.000   21-34:  22  
+    ##  Mean   :1988   Mean   :55.06                Mean   : 2.712               
+    ##  3rd Qu.:1990   3rd Qu.:65.00                3rd Qu.: 4.000               
+    ##  Max.   :1993   Max.   :90.00                Max.   :34.000
+
+    ##       pgr               er            size      gradeF   menoF     
+    ##  Min.   :   0.0   Min.   :   0.0   <=20 :1387   2: 794   No :1312  
+    ##  1st Qu.:   4.0   1st Qu.:  11.0   20-50:1291   3:2188   Yes:1670  
+    ##  Median :  41.0   Median :  61.0   >50  : 304                      
+    ##  Mean   : 161.8   Mean   : 166.6                                   
+    ##  3rd Qu.: 198.0   3rd Qu.: 202.8                                   
+    ##  Max.   :5004.0   Max.   :3275.0
+
+    ##  hormonF    chemoF     recurF     deathF    
+    ##  No :2643   No :2402   No :1464   No :1710  
+    ##  Yes: 339   Yes: 580   Yes:1518   Yes:1272
 
 <br>
 
 **Univariate plots**
 
-<img src="index_files/figure-gfm/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 <br>
 
-<img src="index_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 <br>
 
-<img src="index_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 <br>
 
-<img src="index_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 <br>
-
-Group some predictors: Age (“24-60”, “61-90”) and Nodes (0-10, 11-20,
-20+) It is also better to factor other predictors such. as Grade, Meno,
-Hormon, Chemo, Recur and death
-
-    ## 'data.frame':    2982 obs. of  23 variables:
-    ##  $ pid        : int  1 2 3 4 5 6 7 8 9 10 ...
-    ##  $ year       : int  1992 1984 1983 1985 1983 1983 1993 1988 1988 1988 ...
-    ##  $ age        : int  74 79 44 70 75 52 40 53 60 52 ...
-    ##  $ meno       : int  1 1 0 1 1 0 0 1 1 0 ...
-    ##  $ size       : Factor w/ 3 levels "<=20","20-50",..: 1 2 1 2 1 1 1 1 1 2 ...
-    ##  $ grade      : int  3 3 2 3 3 3 2 2 2 3 ...
-    ##  $ nodes      : int  0 0 0 0 0 0 0 0 0 5 ...
-    ##  $ pgr        : int  35 36 138 0 260 139 13 1 627 316 ...
-    ##  $ er         : int  291 611 0 12 409 303 4 4 151 976 ...
-    ##  $ hormon     : int  0 0 0 0 0 0 0 0 0 0 ...
-    ##  $ chemo      : int  0 0 0 0 0 0 0 0 0 0 ...
-    ##  $ rtime      : num  1799 2828 6012 2624 4915 ...
-    ##  $ recur      : int  0 0 0 0 0 0 0 0 0 0 ...
-    ##  $ dtime      : num  1799 2828 6012 2624 4915 ...
-    ##  $ death      : int  0 0 0 0 0 0 0 0 0 0 ...
-    ##  $ age.group  : Factor w/ 2 levels "24-60","61-90": 2 2 1 2 2 1 1 1 1 1 ...
-    ##  $ nodes.group: Factor w/ 3 levels "0-10","11-20",..: 1 1 1 1 1 1 1 1 1 1 ...
-    ##  $ gradeF     : Factor w/ 2 levels "2","3": 2 2 1 2 2 2 1 1 1 2 ...
-    ##  $ menoF      : Factor w/ 2 levels "No","Yes": 2 2 1 2 2 1 1 2 2 1 ...
-    ##  $ hormonF    : Factor w/ 2 levels "No","Yes": 1 1 1 1 1 1 1 1 1 1 ...
-    ##  $ chemoF     : Factor w/ 2 levels "No","Yes": 1 1 1 1 1 1 1 1 1 1 ...
-    ##  $ recurF     : Factor w/ 2 levels "No","Yes": 1 1 1 1 1 1 1 1 1 1 ...
-    ##  $ deathF     : Factor w/ 2 levels "No","Yes": 1 1 1 1 1 1 1 1 1 1 ...
-
-    ##       pid              year           age             meno         size     
-    ##  Min.   :   1.0   Min.   :1978   Min.   :24.00   Min.   :0.00   <=20 :1387  
-    ##  1st Qu.: 753.2   1st Qu.:1986   1st Qu.:45.00   1st Qu.:0.00   20-50:1291  
-    ##  Median :1504.5   Median :1988   Median :54.00   Median :1.00   >50  : 304  
-    ##  Mean   :1505.0   Mean   :1988   Mean   :55.06   Mean   :0.56               
-    ##  3rd Qu.:2254.8   3rd Qu.:1990   3rd Qu.:65.00   3rd Qu.:1.00               
-    ##  Max.   :3007.0   Max.   :1993   Max.   :90.00   Max.   :1.00               
-    ##      grade           nodes             pgr               er        
-    ##  Min.   :2.000   Min.   : 0.000   Min.   :   0.0   Min.   :   0.0  
-    ##  1st Qu.:2.000   1st Qu.: 0.000   1st Qu.:   4.0   1st Qu.:  11.0  
-    ##  Median :3.000   Median : 1.000   Median :  41.0   Median :  61.0  
-    ##  Mean   :2.734   Mean   : 2.712   Mean   : 161.8   Mean   : 166.6  
-    ##  3rd Qu.:3.000   3rd Qu.: 4.000   3rd Qu.: 198.0   3rd Qu.: 202.8  
-    ##  Max.   :3.000   Max.   :34.000   Max.   :5004.0   Max.   :3275.0  
-    ##      hormon           chemo            rtime            recur       
-    ##  Min.   :0.0000   Min.   :0.0000   Min.   :  36.0   Min.   :0.0000  
-    ##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.: 823.5   1st Qu.:0.0000  
-    ##  Median :0.0000   Median :0.0000   Median :1940.0   Median :1.0000  
-    ##  Mean   :0.1137   Mean   :0.1945   Mean   :2097.9   Mean   :0.5091  
-    ##  3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:3198.8   3rd Qu.:1.0000  
-    ##  Max.   :1.0000   Max.   :1.0000   Max.   :7043.0   Max.   :1.0000  
-    ##      dtime          death        age.group    nodes.group  gradeF   menoF     
-    ##  Min.   :  36   Min.   :0.0000   24-60:1907   0-10 :2770   2: 794   No :1312  
-    ##  1st Qu.:1607   1st Qu.:0.0000   61-90:1075   11-20: 190   3:2188   Yes:1670  
-    ##  Median :2638   Median :0.0000                21-34:  22                      
-    ##  Mean   :2605   Mean   :0.4266                                                
-    ##  3rd Qu.:3555   3rd Qu.:1.0000                                                
-    ##  Max.   :7043   Max.   :1.0000                                                
-    ##  hormonF    chemoF     recurF     deathF    
-    ##  No :2643   No :2402   No :1464   No :1710  
-    ##  Yes: 339   Yes: 580   Yes:1518   Yes:1272  
-    ##                                             
-    ##                                             
-    ##                                             
-    ## 
 
 Fit model for overall survival death: censoring status (0=
 censored/alive, 1= dead) dtime: days until event or censoring
 
 <br>
 
-**Censoring**
+**Survival data representations and censoring**
 
-Model 1
+In survival analysis, the interest is on analyzing data where the
+outcome variable is time to an event, measured from a defined starting
+point. In this analysis, the outcome variable is `dtime` which is the
+duration of survival or the days to death or last follow-up of breast
+cancer patients. The event of interest is death as indicated by the
+variable `death` (class 1/yes - dead) and the starting point is the
+patient’s surgery indicated by the year of surgery (`year`)and age of
+patient at surgery (`age`).
 
-<img src="index_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
-
-Survival data representation using triplet (entry age, exit age, event)
+The figure below shows a histogram of `dtime` and count of patients
+based on `death` status for the study period.
 
 <img src="index_files/figure-gfm/unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
+<br>
 
-Survival data representation using triplet (follow up time, event)
+In the dataset, censoring occurs when information about a patient’s
+survival is incomplete based on the available data. Since there is no
+missing value in the `year`, it can be said that there can be right
+censoring in the dataset, i.e., some patients may not have died by the
+end of study period (alive), some patients might have been lost to
+follow up or have died after the study period (censored). These can be
+seen in the graphical representations of survival data below.
+
+The figure below shows survival data of randomly selected 30 breast
+cancer patients from the dataset. The survival data is represented using
+the triplet - entry age, exit age, event. From the starting point which
+was the `age` at surgery, the patient was followed until they experience
+the event (death) or they are censored. If the patient had a recurrence
+(1-relapse) within the study period, it is marked marked by a ‘purple’
+dot.
 
 <img src="index_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
+<br>
+
+Another way to present survival data of the 30 sampled patients is using
+the pair: follow-up (survival) time, event. This is shown in the figure
+below.
+
+<img src="index_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+
 <br> <br>
 
-### III. Kaplan-Meier Survival Curves and Log-Rank Tests
+### III. Kaplan-Meier Survival Curves and Log Rank Tests
 
 **A. Kaplan-Meier Curves**
 
-Model 1: OVERALL FIRST
+Kaplan- Meier curves are non-parametric summary of the probability of
+survival past a certain time. The KM survival curve of the breast cancer
+patients from the dataset is shown below:
 
 ``` r
 mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 ```
 
-<img src="index_files/figure-gfm/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
 
     ##   strata median lower upper
     ## 1    All   4033  3888  4309
+
+The median survival time for the breast cancer patients in the dataset
+is 4033 days.
 
     ## Call: survfit(formula = Surv(dtime, death) ~ 1, data = cancer_df)
     ## 
     ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
     ##  1825   2084     753    0.744 0.00807        0.728         0.76
 
-Generate KM curves for explanatory variables:
+<br>
 
-``` r
-m1_age <- survfit(Surv(dtime, death) ~ age.group, data = cancer_df)
-m1_nodes <- survfit(Surv(dtime, death) ~ nodes.group, data = cancer_df)
-m1_pgr <- survfit(Surv(dtime, death) ~ pgr, data = cancer_df)
-m1_er <- survfit(Surv(dtime, death) ~ er, data = cancer_df)
+Separate KM curves can also be plotted and compared for different
+variables to explore if different values/levels of the variables affect
+survival probabilities. Below are the KM curves for the features
+`age.group`, `menoF`, `nodes.group`, `hormonF`, `size`, `chemoF`,
+`gradeF`, and `recurF`.
 
-m1_size <- survfit(Surv(dtime, death) ~ size, data = cancer_df)
-m1_grade <- survfit(Surv(dtime, death) ~ gradeF, data = cancer_df)
-m1_meno <- survfit(Surv(dtime, death) ~ menoF, data = cancer_df)
-m1_hormon <- survfit(Surv(dtime, death) ~ hormonF, data = cancer_df)
-m1_chemo <- survfit(Surv(dtime, death) ~ chemoF, data = cancer_df)
-m1_recur <- survfit(Surv(dtime, death) ~ recurF, data = cancer_df)
-
-# define titles
-titlelist <- list("Age", "Nodes", "pgr", "er", "Size", "Grade", "Meno", "Hormon", "Chemo", "Recur")
-
-#Plot
-
-survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_hormon, m1_chemo, m1_recur),
-           pval = TRUE, pval.method = TRUE, conf.int = TRUE,
-           risk.table = TRUE, fontsize = 4,
-           risk.table.col = "strata",
-           linetype = "strata",
-           xlim = c(0, 7043),
-           surv.median.line = "hv",
-           ggtheme = theme_bw(), 
-           palette = c("slateblue3", "peru", "green4"),
-           risk.table.height = 0.30)
-
-arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
-```
-
-<img src="index_files/figure-gfm/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-20-1.png" style="display: block; margin: auto;" />
 <br>
 
 **B. Log Rank test**
 
-By using log rank test, we can test if there is difference in the
-ssurvival cureves of the categories/predictors.
-
-Null hypothesis, Ho: the survival curves are equal Alternate hypothesis,
-Ha: the survival curves are different for at least some intervals
-
-Use `coxph` function.
+Log rank test was used to determine if differences in the survival
+curves of each feature/variable were significant. For instance, using
+the log rank test for `gradeF`:
 
 ``` r
-log.rank.recur <- coxph(Surv(dtime, death) ~ recurF, data = cancer_df)
-summary(log.rank.recur)
+log.rank.grade <- coxph(Surv(dtime, death) ~ gradeF, data = cancer_df)
+summary(log.rank.grade)
 ```
 
     ## Call:
-    ## coxph(formula = Surv(dtime, death) ~ recurF, data = cancer_df)
+    ## coxph(formula = Surv(dtime, death) ~ gradeF, data = cancer_df)
     ## 
     ##   n= 2982, number of events= 1272 
     ## 
-    ##              coef exp(coef) se(coef)     z Pr(>|z|)    
-    ## recurFYes 2.03814   7.67631  0.07804 26.12   <2e-16 ***
+    ##            coef exp(coef) se(coef)     z Pr(>|z|)    
+    ## gradeF3 0.50600   1.65864  0.06945 7.286 3.19e-13 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ##           exp(coef) exp(-coef) lower .95 upper .95
-    ## recurFYes     7.676     0.1303     6.588     8.945
+    ##         exp(coef) exp(-coef) lower .95 upper .95
+    ## gradeF3     1.659     0.6029     1.448       1.9
     ## 
-    ## Concordance= 0.711  (se = 0.006 )
-    ## Likelihood ratio test= 988.1  on 1 df,   p=<2e-16
-    ## Wald test            = 682  on 1 df,   p=<2e-16
-    ## Score (logrank) test = 945.9  on 1 df,   p=<2e-16
+    ## Concordance= 0.55  (se = 0.006 )
+    ## Likelihood ratio test= 58.27  on 1 df,   p=2e-14
+    ## Wald test            = 53.09  on 1 df,   p=3e-13
+    ## Score (logrank) test = 54.22  on 1 df,   p=2e-13
 
-The score for the log-rank test for recur is 945.9 with very low
-p-value. This means we reject the null hypothesis that the survival
-curves for recur are the same (as visually shown in KM curve)
+The result shows that the difference between the survival curves are
+significant (low p-value). The median survival time for those who have
+tumor differentiation grade 2 was 5653 days while 3700 days for those
+with tumor grade 3 (shown below and also in the KM curve).
+
+    ##     strata median lower upper
+    ## 1 gradeF=2   5653  4782    NA
+    ## 2 gradeF=3   3700  3540  3977
 
 <br>
 
-Table \_\_. Log-rank test scores an dp-value for all covariates
+The table below shows a summary of the log rank test results performed
+on the features. The features `er` (estrogen receptor biomarker) and
+`chemoF` (indicator of whether the patient received chemotherapy) both
+have KM survival curves that have statistically non-significant
+firrences.
 
 <table style="border-collapse:collapse; border:none;">
 <tr>
@@ -685,7 +633,7 @@ the ‘GLOBAL’ test.
 
 Plot of Schoenfeld residuals against `dtime`.
 
-<img src="index_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-30-1.png" style="display: block; margin: auto;" />
 
 We can address these using stratification.
 
@@ -744,11 +692,11 @@ which means the assumption is not violated.
 
 **Hazard Ratio**
 
-<img src="index_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
 <br> <br>
 
 ### V. Conclusion
 
 ### Hazard Ratio
 
-<img src="index_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-34-1.png" style="display: block; margin: auto;" />
