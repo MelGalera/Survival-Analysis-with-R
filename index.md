@@ -132,11 +132,6 @@ There are no missing data in each feature.
 <img src="index_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 <br>
 
-Fit model for overall survival death: censoring status (0=
-censored/alive, 1= dead) dtime: days until event or censoring
-
-<br>
-
 **Survival data representations and censoring**
 
 In survival analysis, the interest is on analyzing data where the
@@ -247,10 +242,11 @@ summary(log.rank.grade)
     ## Wald test            = 53.09  on 1 df,   p=3e-13
     ## Score (logrank) test = 54.22  on 1 df,   p=2e-13
 
-The result shows that the difference between the survival curves are
-significant (low p-value). The median survival time for those who have
-tumor differentiation grade 2 was 5653 days while 3700 days for those
-with tumor grade 3 (shown below and also in the KM curve).
+The result shows that the survival curves for `gradeF` are significantly
+different for at least some time intervals (low p-value). The median
+survival time for those who have tumor differentiation grade 2 was 5653
+days while 3700 days for those with tumor grade 3 (shown below and also
+in the KM curve).
 
     ##     strata median lower upper
     ## 1 gradeF=2   5653  4782    NA
@@ -259,10 +255,10 @@ with tumor grade 3 (shown below and also in the KM curve).
 <br>
 
 The table below shows a summary of the log rank test results performed
-on the features. The features `er` (estrogen receptor biomarker) and
-`chemoF` (indicator of whether the patient received chemotherapy) both
-have KM survival curves that have statistically non-significant
-firrences.
+on the features or covariates. The covariates `er` (estrogen receptor
+biomarker) and `chemoF` (indicator of whether the patient received
+chemotherapy) both have KM survival curves that have statistically
+non-significant firrences.
 
 <table style="border-collapse:collapse; border:none;">
 <tr>
@@ -458,17 +454,29 @@ The survival curves have statistically significant differences.
 
 ### IV. Cox proportional hazard regression models
 
-These models give us estimates of the “hazard ratio”
+Cox regression is used for modelling time-to-event data to relate the
+outcome (survival duration or `dtime`) to one or more covariates. It
+estimates **hazard ratios** which describe, in this analysis, the
+relative probability of `death` occuring at `dtime`, given that `death`
+hasn’t happened up until time `dtime`.
 
-1.  Model 1 - Univariable Cox model (same as above)
-2.  Model 2 - Multivariable Cox model (except er and chemoF)
+For this anaysis, three Cox regression models were evaluated
+
+1.  Model 1 - Reduced multivariable model
+2.  Model 2 - Full multivariable model
 3.  Model 3 - Stratified model
 
-Models are detailed below.
+Note that Model 3 was developed as a result of the diagnostics test
+after comparing Models 1 and 2. The models are detailed below.
 
 <br>
 
-**Model 1 - Univariable Cox model**
+**Model 1 - Reduced multivariable model**
+
+This model fits a Cox regression model that relates time-to-event
+(`dtime`, `death`) to a reduced list of relevant covariates, i.e.,
+excluding `er` and `chemoF` in the model. The basis of this was the
+results of the log rank tests performed above.
 
 ``` r
 surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
@@ -515,10 +523,18 @@ summary(surv.model)
 
 <br>
 
-**Model 2 - Multivariable Cox model**
+**Model 2 - Full multivariable model**
 
-To check if the multivariable cox model is better than a complex one
-(complete)
+This is a more complex model that fits a Cox regression model which
+relates time-to-event (`dtime`, `death`) to all relevant covariates from
+the dataset.
+
+``` r
+surv.model_full <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + er + size +
+                      gradeF + menoF + hormonF + chemoF + recurF, data = cancer_df)
+
+summary(surv.model_full)
+```
 
     ## Call:
     ## coxph(formula = Surv(dtime, death) ~ age.group + nodes.group + 
@@ -564,7 +580,11 @@ To check if the multivariable cox model is better than a complex one
 
 <br>
 
-**Comparison of models**
+**Comparing Models 1 and 2**
+
+A likelihood ratio test was used to compare nested models 1 and 2
+(below). The result showed preference for the reduced and simpler model
+(Model 1) providing adequate fit (based on p-value).
 
     ## Analysis of Deviance Table
     ##  Cox model: response is  Surv(dtime, death)
@@ -576,39 +596,13 @@ To check if the multivariable cox model is better than a complex one
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-P-value is high which means we can use the reduced model.
-
-Comparing univariate and multivariate via table
-
-| Dependent: Surv(dtime, death) |           |           all |           HR (univariable) |         HR (multivariable) |
-|:------------------------------|:----------|--------------:|---------------------------:|---------------------------:|
-| age.group                     | 24-60     |   1907 (64.0) |                         \- |                         \- |
-|                               | 61-90     |   1075 (36.0) | 1.51 (1.35-1.69, p\<0.001) |  1.25 (1.08-1.45, p=0.004) |
-| nodes.group                   | 0-10      |   2770 (92.9) |                         \- |                         \- |
-|                               | 11-20     |     190 (6.4) | 3.36 (2.83-4.00, p\<0.001) | 1.68 (1.40-2.01, p\<0.001) |
-|                               | 21-34     |      22 (0.7) |  2.34 (1.40-3.89, p=0.001) |  1.05 (0.63-1.75, p=0.859) |
-| pgr                           | Mean (SD) | 161.8 (291.3) | 1.00 (1.00-1.00, p\<0.001) | 1.00 (1.00-1.00, p\<0.001) |
-| er                            | Mean (SD) | 166.6 (272.5) |  1.00 (1.00-1.00, p=0.440) |                         \- |
-| size                          | \<=20     |   1387 (46.5) |                         \- |                         \- |
-|                               | 20-50     |   1291 (43.3) | 1.95 (1.73-2.21, p\<0.001) | 1.53 (1.35-1.73, p\<0.001) |
-|                               | \>50      |    304 (10.2) | 3.74 (3.17-4.42, p\<0.001) | 2.30 (1.94-2.73, p\<0.001) |
-| gradeF                        | 2         |    794 (26.6) |                         \- |                         \- |
-|                               | 3         |   2188 (73.4) | 1.66 (1.45-1.90, p\<0.001) |  1.21 (1.05-1.39, p=0.007) |
-| menoF                         | No        |   1312 (44.0) |                         \- |                         \- |
-|                               | Yes       |   1670 (56.0) | 1.54 (1.37-1.72, p\<0.001) |  1.27 (1.09-1.49, p=0.002) |
-| hormonF                       | No        |   2643 (88.6) |                         \- |                         \- |
-|                               | Yes       |    339 (11.4) | 1.51 (1.28-1.79, p\<0.001) |  1.06 (0.89-1.26, p=0.547) |
-| chemoF                        | No        |   2402 (80.5) |                         \- |                         \- |
-|                               | Yes       |    580 (19.5) |  1.05 (0.92-1.20, p=0.482) |                         \- |
-| recurF                        | No        |   1464 (49.1) |                         \- |                         \- |
-|                               | Yes       |   1518 (50.9) | 7.68 (6.59-8.95, p\<0.001) | 6.94 (5.94-8.10, p\<0.001) |
-
 <br>
 
 **Model Diagnostics**
 
-Assess any violation of the proportionality assumption through
-statistical test based on Schoenfeld residuals.
+A key assumption for the Cox regression model is proportional hazards. A
+statistical test based on Schoenfeld residuals was used to check if
+Model 1 violates the proportionality assumption..
 
 ``` r
 stat.test <- cox.zph(surv.model)
@@ -626,16 +620,14 @@ stat.test
     ## recurF       0.0164  1  0.8982
     ## GLOBAL      39.3971 10 2.2e-05
 
-For this test, significant p-values indicate non-proportional hazards.
-We can say that `age.group` adn `pgr` variables violate the proportional
-hazard assumption. This is also evident from the low p-value (\<0.05) of
-the ‘GLOBAL’ test.
+The result above showed that `age.group` and `pgr` variables violated
+the proportional hazard assumption (based on individual and global
+p-values \<0.05). Plots of Schoenfeld residuals against `dtime` aare
+shown below:
 
-Plot of Schoenfeld residuals against `dtime`.
+<img src="index_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
 
-<img src="index_files/figure-gfm/unnamed-chunk-30-1.png" style="display: block; margin: auto;" />
-
-We can address these using stratification.
+<br>
 
 **Model 3 - Stratified model**
 
@@ -692,11 +684,34 @@ which means the assumption is not violated.
 
 **Hazard Ratio**
 
-<img src="index_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
 <br> <br>
 
 ### V. Conclusion
 
 ### Hazard Ratio
 
-<img src="index_files/figure-gfm/unnamed-chunk-34-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
+
+| Dependent: Surv(dtime, death) |           |           all |           HR (univariable) |         HR (multivariable) |
+|:------------------------------|:----------|--------------:|---------------------------:|---------------------------:|
+| age.group                     | 24-60     |   1907 (64.0) |                         \- |                         \- |
+|                               | 61-90     |   1075 (36.0) | 1.51 (1.35-1.69, p\<0.001) |  1.25 (1.08-1.45, p=0.004) |
+| nodes.group                   | 0-10      |   2770 (92.9) |                         \- |                         \- |
+|                               | 11-20     |     190 (6.4) | 3.36 (2.83-4.00, p\<0.001) | 1.68 (1.40-2.01, p\<0.001) |
+|                               | 21-34     |      22 (0.7) |  2.34 (1.40-3.89, p=0.001) |  1.05 (0.63-1.75, p=0.859) |
+| pgr                           | Mean (SD) | 161.8 (291.3) | 1.00 (1.00-1.00, p\<0.001) | 1.00 (1.00-1.00, p\<0.001) |
+| er                            | Mean (SD) | 166.6 (272.5) |  1.00 (1.00-1.00, p=0.440) |                         \- |
+| size                          | \<=20     |   1387 (46.5) |                         \- |                         \- |
+|                               | 20-50     |   1291 (43.3) | 1.95 (1.73-2.21, p\<0.001) | 1.53 (1.35-1.73, p\<0.001) |
+|                               | \>50      |    304 (10.2) | 3.74 (3.17-4.42, p\<0.001) | 2.30 (1.94-2.73, p\<0.001) |
+| gradeF                        | 2         |    794 (26.6) |                         \- |                         \- |
+|                               | 3         |   2188 (73.4) | 1.66 (1.45-1.90, p\<0.001) |  1.21 (1.05-1.39, p=0.007) |
+| menoF                         | No        |   1312 (44.0) |                         \- |                         \- |
+|                               | Yes       |   1670 (56.0) | 1.54 (1.37-1.72, p\<0.001) |  1.27 (1.09-1.49, p=0.002) |
+| hormonF                       | No        |   2643 (88.6) |                         \- |                         \- |
+|                               | Yes       |    339 (11.4) | 1.51 (1.28-1.79, p\<0.001) |  1.06 (0.89-1.26, p=0.547) |
+| chemoF                        | No        |   2402 (80.5) |                         \- |                         \- |
+|                               | Yes       |    580 (19.5) |  1.05 (0.92-1.20, p=0.482) |                         \- |
+| recurF                        | No        |   1464 (49.1) |                         \- |                         \- |
+|                               | Yes       |   1518 (50.9) | 7.68 (6.59-8.95, p\<0.001) | 6.94 (5.94-8.10, p\<0.001) |

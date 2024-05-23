@@ -308,14 +308,6 @@ ggarrange(p10_recur, p11_death,  ncol = 3)
 ```
 <br>
 
-
-Fit model for overall survival
-  death: censoring status (0= censored/alive, 1= dead)
-  dtime: days until event or censoring
-
-<br>
-
-
 **Survival data representations and censoring**
 
 In survival analysis, the interest is on analyzing data where the outcome variable is time to an event, measured from a defined starting point. In this analysis, the outcome variable is `dtime` which is the duration of survival or the days to death or last follow-up of breast cancer patients. The event of interest is death as indicated by the variable `death` (class 1/yes - dead) and the starting point is the patient's surgery indicated by the year of surgery (`year`)and age of patient at surgery (`age`).  
@@ -457,7 +449,7 @@ log.rank.grade <- coxph(Surv(dtime, death) ~ gradeF, data = cancer_df)
 summary(log.rank.grade)
 ```
 
-The result shows that the difference between the survival curves are significant (low p-value). The median survival time for those who have tumor differentiation grade 2 was 5653 days while 3700 days for those with tumor grade 3 (shown below and also in the KM curve).
+The result shows that the survival curves for `gradeF` are significantly different for at least some time intervals (low p-value). The median survival time for those who have tumor differentiation grade 2 was 5653 days while 3700 days for those with tumor grade 3 (shown below and also in the KM curve).
 
 ```{r}
 surv_median(m1_grade )
@@ -492,7 +484,7 @@ results.df <- results.trans %>%
 ```
 <br>
 
-The table below shows a summary of the log rank test results performed on the features. The features `er` (estrogen receptor biomarker) and `chemoF` (indicator of whether the patient received chemotherapy) both have KM survival curves that have statistically non-significant firrences. 
+The table below shows a summary of the log rank test results performed on the features or covariates. The covariates `er` (estrogen receptor biomarker) and `chemoF` (indicator of whether the patient received chemotherapy) both have KM survival curves that have statistically non-significant firrences. 
 
 ```{r}
 sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)
@@ -503,17 +495,21 @@ sjPlot::tab_df(results.df, show.rownames = TRUE, digits = 4)
 
 ### IV. Cox proportional hazard regression models
 
-These models give us estimates of the "hazard ratio"
+Cox regression is used for modelling time-to-event data to relate the outcome (survival duration or `dtime`) to one or more covariates. It estimates **hazard ratios** which describe, in this analysis, the relative probability of `death` occuring at `dtime`, given that `death` hasn't happened up until time `dtime`.  
 
-1. Model 1 - Univariable Cox model (same as above)
-2. Model 2 - Multivariable Cox model (except er and chemoF)
+For this anaysis, three Cox regression models were evaluated
+
+1. Model 1 - Reduced multivariable model
+2. Model 2 - Full multivariable model
 3. Model 3 - Stratified model
 
-Models are detailed below.
+Note that Model 3 was  developed as a result of the diagnostics test after comparing Models 1 and 2. The models are detailed below.
 
 <br>
 
-**Model 1 - Univariable Cox model**
+**Model 1 - Reduced multivariable model**
+
+This model fits a Cox regression model  that relates time-to-event (`dtime`, `death`) to a reduced list of relevant covariates, i.e., excluding `er` and `chemoF` in the model. The basis of this was the results of the log rank tests performed above.
 
 ```{r, echo=TRUE}
 surv.model <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + size +
@@ -523,11 +519,11 @@ summary(surv.model)
 
 <br>
 
-**Model 2 - Multivariable Cox model**
+**Model 2 - Full multivariable model**
 
-To check if the multivariable cox model is better than a complex one (complete)
+This is a more complex model that fits a Cox regression model which relates time-to-event (`dtime`, `death`) to all relevant covariates from the dataset.
 
-```{r}
+```{r, echo=TRUE}
 surv.model_full <- coxph(Surv(dtime, death) ~ age.group + nodes.group + pgr + er + size +
                       gradeF + menoF + hormonF + chemoF + recurF, data = cancer_df)
 
@@ -536,57 +532,36 @@ summary(surv.model_full)
 
 <br>
 
-**Comparison of models**
+**Comparing Models 1 and 2**
+
+A likelihood ratio test was used to compare nested models 1 and 2 (below). The result showed preference for the reduced and simpler model (Model 1) providing adequate fit (based on p-value).
 
 ```{r}
 # anova test
 anova(surv.model, surv.model_full)
 ```
-P-value is high which means we can use the reduced model.
-
-Comparing univariate and multivariate via table
-
-```{r}
-# create comparison table
-mykable <- function(x){
-  knitr::kable(x, row.names = FALSE, align = c("l", "l", "r", "r", "r", "r", "r", "r", "r"))
-}
-
-dependent_os <- "Surv(dtime, death)"
-
-explanatory <- c("age.group", "nodes.group", "pgr", "er", "size", "gradeF", "menoF", "hormonF", "chemoF", "recurF")
-explanatory_multi <- c("age.group", "nodes.group", "pgr", "size", "gradeF", "menoF", "hormonF", "recurF")
-
-# create table
-cancer_df %>% 
-  finalfit.coxph(dependent_os, explanatory, explanatory_multi) %>% 
-  mykable()
-
-```
-
 <br>
 
 **Model Diagnostics**
 
-Assess any violation of the proportionality assumption through statistical test based on Schoenfeld residuals.
+A key assumption for the Cox regression model is proportional hazards. A statistical test based on Schoenfeld residuals was used to check if Model 1 violates the proportionality assumption..
 
 ```{r, echo=TRUE}
 stat.test <- cox.zph(surv.model)
 stat.test
 ```
-For this test, significant p-values indicate non-proportional hazards. We can say that `age.group` adn `pgr` variables violate the proportional hazard assumption. This is also evident from the low p-value (<0.05) of the 'GLOBAL' test.
-
-Plot of Schoenfeld residuals against `dtime`.
+The result above showed that `age.group` and `pgr` variables violated the proportional hazard assumption (based on individual and global p-values <0.05). Plots of Schoenfeld residuals against `dtime` aare shown below:
 
 ```{r, fig.align='center', fig.width=15, fig.height= 8}
 ggcoxzph(stat.test)
 
 ```
 
-
-We can address these using stratification.
+<br>
 
 **Model 3 - Stratified model**
+
+
 
 ```{r}
 surv.model.stratified <- coxph(Surv(dtime, death) ~ strata(age.group) + nodes.group + strata(pgr) + size +
@@ -630,6 +605,23 @@ ggforest(surv.model, data = cancer_df, fontsize = 1.1)
 
 
 
+```{r}
+# create comparison table
+mykable <- function(x){
+  knitr::kable(x, row.names = FALSE, align = c("l", "l", "r", "r", "r", "r", "r", "r", "r"))
+}
+
+dependent_os <- "Surv(dtime, death)"
+
+explanatory <- c("age.group", "nodes.group", "pgr", "er", "size", "gradeF", "menoF", "hormonF", "chemoF", "recurF")
+explanatory_multi <- c("age.group", "nodes.group", "pgr", "size", "gradeF", "menoF", "hormonF", "recurF")
+
+# create table
+cancer_df %>% 
+  finalfit.coxph(dependent_os, explanatory, explanatory_multi) %>% 
+  mykable()
+
+```
 
 
 
