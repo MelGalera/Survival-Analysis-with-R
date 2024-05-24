@@ -28,8 +28,9 @@ cancer_df <-survival::rotterdam
 
 ### I. Project objective
 
+Breast cancer is the most common cancer diagnosed in women and is the second most common cause of cancer death among women worldwide. The primary treatment recommended for most types of breast cancer is surgery because it is the most effective means of breast cancer removal when it is technically feasible to remove it, and recommended in all stages except the last. 
 
-
+This project was aimed at performing a survival analysis for primary breast cancer patients who have undergone breast cancer surgery based on several factors or variables (patient's characteristics, tumor characteristics, and treatment received) and provide estimates of each of the variable's hazard ratios.  
 <br>
 <br>
 
@@ -37,7 +38,7 @@ cancer_df <-survival::rotterdam
 
 **A. Data Collection**
 
-In this project, the in-built dataset "rotterdam" from the survival package in R was used. This dataset has 2982 records of patients with primary breast cancers available in the Rotterdam tumor bank. It has 15 variables:
+In this project, the in-built dataset "rotterdam" from the survival package in R was used. This dataset has 2982 records of patients with primary breast cancers available in the Rotterdam tumor bank. Primary breast cancer which is breast cancer that has not spread beyond the breast or the lymph nodes under the arm. The dataset has 15 variables/covariates:
 
   * `pid`     : patient identifier
   * `year`    : year of surgery   
@@ -318,7 +319,7 @@ The figure below shows a histogram of `dtime` and count of patients based on `de
 hist_01 <- ggplot(cancer_df, aes(dtime)) +
   geom_histogram(aes(fill = deathF), alpha = 0.8, bins = 40, position="identity") +
   scale_fill_manual(values = c("slateblue3", "peru"), labels = c("0 - Alive/Censored", "1 - Dead")) +
-  labs(title = " Distribution of censoring status") +
+  labs(title = " Distribution of survival status (death)") +
   theme(plot.title = element_text(size=11))
 
 hist_01
@@ -370,6 +371,74 @@ ggplot(data=cancer_df_sample) +
 
 ```
 
+```{r, results='hide'}
+# get the longest time for alive/censored (death = 0) (recur = 0)
+max.time.0 <-cancer_df %>% filter(death == 0) %>% filter(recur == 0) %>% filter(dtime == max(dtime))
+a0 <- max.time.0 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365)%>% select(dtime, numyears, recuryears, year, age, recur)
+
+# get the longest time for dead (death = 1) (recur = 0)
+max.time.1 <-cancer_df %>% filter(death == 1) %>% filter(recur == 0) %>% filter(dtime == max(dtime))
+a1 <- max.time.1 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365)%>% select(dtime, numyears, recuryears, year, age, recur)
+
+rbind(a1, a0)
+
+```
+Based on the dataset:
+
+* Without recurrence: The longest time until death (death = 1) was 5830 days (about 16 years) after surgery by a patient who had surgery in 1983 at 66 years old (recur = 0)
+* Without recurrence: The longest time recorded for alive/censored (death = 0) was 7043 days (about 19 years) after surgery by a patient who had surgery in 1981 at 49 years old (recur = 0).
+
+```{r, results='hide'}
+# get the longest time for alive/censored (death = 0)(recur = 1)
+max.time.0 <-cancer_df %>% filter(death == 0) %>% filter(recur == 1) %>% filter(dtime == max(dtime))
+a0 <- max.time.0 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365) %>% select(dtime, rtime, numyears, recuryears, year, age, recur)
+
+# get the longest time for dead (death = 1)(recur = 1)
+max.time.1 <-cancer_df %>% filter(death == 1) %>% filter(recur == 1) %>% filter(dtime == max(dtime))
+a1 <- max.time.1 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365) %>% select(dtime, rtime, numyears, recuryears, year, age, recur)
+
+rbind(a1, a0)
+
+```
+
+* With recurrence: The longest time until death (death = 1) was 6233 days (about 17 years) after surgery by a patient who had surgery in 1983 at 64 years old. The patient had recurrence 3732 days (about 10 years) after surgery (recur = 1)
+* With recurrence: The longest time recorded for alive/censored (death = 0) was 6886 days (about 19 years) after surgery by a patient who had surgery in 1980 at 45 years old. The patient had recurrence 2570 days (about 7 years) after surgery (recur = 1)
+
+
+```{r, results='hide'}
+# get the shortes time for alive/censored (death = 0)(recur = 0)
+min.time.0 <-cancer_df %>% filter(death == 0) %>% filter(recur == 0) %>% filter(dtime == min(dtime))
+a0 <- min.time.0 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365)%>% select(dtime, numyears, recuryears, year, age, recur)
+
+# get the shortest time for dead (death = 1)(recur = 0)
+min.time.1 <-cancer_df %>% filter(death == 1) %>% filter(recur == 0) %>% filter(dtime == min(dtime))
+a1 <- min.time.1 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365)%>% select(dtime, numyears, recuryears, year, age, recur)
+
+rbind(a1, a0)
+
+```
+
+Unfortunately,
+
+* Without recurrence: The shortest time until death (death = 1) was 45 days after surgery by a patient who had surgery in 1987 at 75 years old (recur = 0)
+* Without recurrence: The longest time recorded for alive/censored (death = 0) was 36 days after surgery by a patient who had surgery in 1992 at 36 years old (recur = 0). The patient was probably censored, loss to follow-up.
+
+```{r, results='hide'}
+# get the shortest time for alive/censored (death = 0)(recur = 1)
+min.time.0 <-cancer_df %>% filter(death == 0) %>% filter(recur == 1) %>% filter(dtime == min(dtime))
+a0 <- min.time.0 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365) %>% select(dtime, rtime, numyears, recuryears, year, age, recur)
+
+# get the shortest time for dead (death = 1)(recur = 1)
+max.time.1 <-cancer_df %>% filter(death == 1) %>% filter(recur == 1) %>% filter(dtime == min(dtime))
+a1 <- max.time.1 %>% mutate(numyears = dtime/365) %>% mutate(recuryears = rtime/365) %>% select(dtime, rtime, numyears, recuryears, year, age, recur)
+
+rbind(a1, a0)
+
+```
+
+* With recurrence: The shortest time until death (death = 1) was 141 days after surgery by a patient who had surgery in 1988 at 68 years old. The patient had recurrence 76 days after surgery (recur = 1)
+* With recurrence: The longest time recorded for alive/censored (death = 0) was 129 days after surgery by a patient who had surgery in 1990 at 53 years old. The patient had recurrence 87 days after surgery (recur = 1). The patient was probably censored, loss to follow-up.
+
 <br>
 <br>
 
@@ -399,8 +468,11 @@ surv_median(mod01_sfit)
 ```
 The median survival time for the breast cancer patients in the dataset is 4033 days.
 
-```{r}
-summary(mod01_sfit, times = 1825)
+Using the KM curve, the 5-year survival rate for primary breast cancer based on the available data in this dataset is 74.4% and the 10-year survival rate is 55.2% as shown below.
+
+```{r, echo = TRUE}
+summary(mod01_sfit, times = 1825)    #1825 days in 5 years
+summary(mod01_sfit, times = 3650)    #3650 days in 10 years
 ```
 <br>
 
@@ -607,6 +679,7 @@ The following can be interpreted:
 
 ### V. Conclusion
 
+In this project, the survival rate of primary breast cancer patients were determined based on the available data in the dataset. The hazard ratios for each variable (covariate) were also estimated with a stratified Cox reggression model. From the results, the number of positive lymph nodes, tumor size, menaupausal status and recurrence (relapse) are the main factors that have significant effect on the survival rate of the patients.  
 
 
 

@@ -5,6 +5,18 @@ Melvin Galera
 
 ### I. Project objective
 
+Breast cancer is the most common cancer diagnosed in women and is the
+second most common cause of cancer death among women worldwide. The
+primary treatment recommended for most types of breast cancer is surgery
+because it is the most effective means of breast cancer removal when it
+is technically feasible to remove it, and recommended in all stages
+except the last.
+
+This project was aimed at performing a survival analysis for primary
+breast cancer patients who have undergone breast cancer surgery based on
+several factors or variables (patient’s characteristics, tumor
+characteristics, and treatment received) and provide estimates of each
+of the variable’s hazard ratios.  
 <br> <br>
 
 ### II. Exploratory Data Analysis
@@ -13,8 +25,10 @@ Melvin Galera
 
 In this project, the in-built dataset “rotterdam” from the survival
 package in R was used. This dataset has 2982 records of patients with
-primary breast cancers available in the Rotterdam tumor bank. It has 15
-variables:
+primary breast cancers available in the Rotterdam tumor bank. Primary
+breast cancer which is breast cancer that has not spread beyond the
+breast or the lymph nodes under the arm. The dataset has 15
+variables/covariates:
 
 - `pid` : patient identifier
 - `year` : year of surgery  
@@ -175,6 +189,46 @@ below.
 
 <img src="index_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
+Based on the dataset:
+
+- Without recurrence: The longest time until death (death = 1) was 5830
+  days (about 16 years) after surgery by a patient who had surgery in
+  1983 at 66 years old (recur = 0)
+
+- Without recurrence: The longest time recorded for alive/censored
+  (death = 0) was 7043 days (about 19 years) after surgery by a patient
+  who had surgery in 1981 at 49 years old (recur = 0).
+
+- With recurrence: The longest time until death (death = 1) was 6233
+  days (about 17 years) after surgery by a patient who had surgery in
+  1983 at 64 years old. The patient had recurrence 3732 days (about 10
+  years) after surgery (recur = 1)
+
+- With recurrence: The longest time recorded for alive/censored (death
+  = 0) was 6886 days (about 19 years) after surgery by a patient who had
+  surgery in 1980 at 45 years old. The patient had recurrence 2570 days
+  (about 7 years) after surgery (recur = 1)
+
+Unfortunately,
+
+- Without recurrence: The shortest time until death (death = 1) was 45
+  days after surgery by a patient who had surgery in 1987 at 75 years
+  old (recur = 0)
+
+- Without recurrence: The longest time recorded for alive/censored
+  (death = 0) was 36 days after surgery by a patient who had surgery in
+  1992 at 36 years old (recur = 0). The patient was probably censored,
+  loss to follow-up.
+
+- With recurrence: The shortest time until death (death = 1) was 141
+  days after surgery by a patient who had surgery in 1988 at 68 years
+  old. The patient had recurrence 76 days after surgery (recur = 1)
+
+- With recurrence: The longest time recorded for alive/censored (death
+  = 0) was 129 days after surgery by a patient who had surgery in 1990
+  at 53 years old. The patient had recurrence 87 days after surgery
+  (recur = 1). The patient was probably censored, loss to follow-up.
+
 <br> <br>
 
 ### III. Kaplan-Meier Survival Curves and Log Rank Tests
@@ -189,7 +243,7 @@ patients from the dataset is shown below:
 mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 ```
 
-<img src="index_files/figure-gfm/unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-21-1.png" style="display: block; margin: auto;" />
 
     ##   strata median lower upper
     ## 1    All   4033  3888  4309
@@ -197,10 +251,27 @@ mod01_sfit <- survfit(Surv(dtime, death) ~ 1, data = cancer_df)
 The median survival time for the breast cancer patients in the dataset
 is 4033 days.
 
+Using the KM curve, the 5-year survival rate for primary breast cancer
+based on the available data in this dataset is 74.4% and the 10-year
+survival rate is 55.2% as shown below.
+
+``` r
+summary(mod01_sfit, times = 1825)    #1825 days in 5 years
+```
+
     ## Call: survfit(formula = Surv(dtime, death) ~ 1, data = cancer_df)
     ## 
     ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
     ##  1825   2084     753    0.744 0.00807        0.728         0.76
+
+``` r
+summary(mod01_sfit, times = 3650)    #3650 days in 10 years
+```
+
+    ## Call: survfit(formula = Surv(dtime, death) ~ 1, data = cancer_df)
+    ## 
+    ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+    ##  3650    687    1171    0.552  0.0104        0.532        0.573
 
 <br>
 
@@ -210,7 +281,7 @@ survival probabilities. Below are the KM curves for the features
 `age.group`, `menoF`, `nodes.group`, `hormonF`, `size`, `chemoF`,
 `gradeF`, and `recurF`.
 
-<img src="index_files/figure-gfm/unnamed-chunk-20-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
 <br>
 
 **B. Log Rank test**
@@ -622,7 +693,7 @@ the proportional hazard assumption (based on individual and global
 p-values \<0.05). Plots of Schoenfeld residuals against `dtime` aare
 shown below:
 
-<img src="index_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
 
 <br>
 
@@ -697,7 +768,7 @@ time `dtime`.
 The figure below shows the forest plot for Model 3 presenting the hazard
 ratios of the covariates for breast cancer patients in the dataset.
 
-<img src="index_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
+<img src="index_files/figure-gfm/unnamed-chunk-36-1.png" style="display: block; margin: auto;" />
 
 The following can be interpreted:
 
@@ -737,3 +808,11 @@ The following can be interpreted:
 <br> <br>
 
 ### V. Conclusion
+
+In this project, the survival rate of primary breast cancer patients
+were determined based on the available data in the dataset. The hazard
+ratios for each variable (covariate) were also estimated with a
+stratified Cox reggression model. From the results, the number of
+positive lymph nodes, tumor size, menaupausal status and recurrence
+(relapse) are the main factors that have significant effect on the
+survival rate of the patients.
