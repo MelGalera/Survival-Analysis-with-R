@@ -769,6 +769,7 @@ The figure below shows the forest plot for Model 3 presenting the hazard
 ratios of the covariates for breast cancer patients in the dataset.
 
 <img src="index_files/figure-gfm/unnamed-chunk-36-1.png" style="display: block; margin: auto;" />
+<br>
 
 The following can be interpreted:
 

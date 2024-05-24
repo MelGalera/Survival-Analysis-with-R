@@ -657,10 +657,11 @@ The Cox regression model gives estimates of the  **hazard ratios**. The hazard r
 
 The figure below shows the forest plot for Model 3 presenting the hazard ratios of the covariates for breast cancer patients in the dataset. 
 
-```{r, fig.align='center', fig.width=14, fig.height=10}
+```{r, fig.align='center', fig.width=16, fig.height=14}
 attr(surv.model.stratified$terms, "dataClasses") <- attr(surv.model.stratified$terms, "dataClasses")[-c(1, 4)]
-ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.1)
+ggforest(model = surv.model.stratified, data = cancer_df, fontsize = 1.7)
 ```
+<br>
 
 The following can be interpreted:
 
