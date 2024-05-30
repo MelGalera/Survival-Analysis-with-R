@@ -1,7 +1,7 @@
 Breast cancer survival analysis with R
 ================
-Melvin Galera
-2024-03-26
+
+<br>
 
 ### I. Project objective
 
@@ -16,8 +16,9 @@ This project was aimed at performing a survival analysis for primary
 breast cancer patients who have undergone breast cancer surgery based on
 several factors or variables (patient’s characteristics, tumor
 characteristics, and treatment received) and provide estimates of each
-of the variable’s hazard ratios.  
-<br> <br>
+of the variable’s hazard ratios.
+
+<br>
 
 ### II. Exploratory Data Analysis
 

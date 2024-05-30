@@ -1,7 +1,7 @@
 ---
 title: "Breast cancer survival analysis with R"
-author: "Melvin Galera"
-date: "2024-03-26"
+#author: "Melvin Galera"
+#date: "2024-03-26"
 output:
   github_document:
     toc: false
@@ -25,13 +25,14 @@ cancer_df <-survival::rotterdam
 
 ```
 
+<br>
 
 ### I. Project objective
 
 Breast cancer is the most common cancer diagnosed in women and is the second most common cause of cancer death among women worldwide. The primary treatment recommended for most types of breast cancer is surgery because it is the most effective means of breast cancer removal when it is technically feasible to remove it, and recommended in all stages except the last. 
 
 This project was aimed at performing a survival analysis for primary breast cancer patients who have undergone breast cancer surgery based on several factors or variables (patient's characteristics, tumor characteristics, and treatment received) and provide estimates of each of the variable's hazard ratios.  
-<br>
+
 <br>
 
 ### II. Exploratory Data Analysis
