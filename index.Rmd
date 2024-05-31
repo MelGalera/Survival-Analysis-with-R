@@ -205,7 +205,7 @@ ggarrange(p4_er, p5_size, p6_grade, ncol =3)
 p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), fill = factor(meno))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3")) +
   scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(meno) %>% 
@@ -225,7 +225,7 @@ p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), 
 p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hormon), fill = factor(hormon))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3")) +
   scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(hormon) %>% 
@@ -244,7 +244,7 @@ p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hor
 p9_chemo <- ggplot(data = cancer_df, aes(x = factor(chemo), color = factor(chemo), fill = factor(chemo))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3")) +
   scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(chemo) %>% 
@@ -270,7 +270,7 @@ ggarrange(p7_meno, p8_hormon, p9_chemo, ncol = 3)
 p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recur), fill = factor(recur))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3")) +
   scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(recur) %>% 
@@ -289,7 +289,7 @@ p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recu
 p11_death <- ggplot(data = cancer_df, aes(x = factor(death), color = factor(death), fill = factor(death))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3")) +
   scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(death) %>% 
@@ -319,7 +319,7 @@ The figure below shows a histogram of `dtime` and count of patients based on `de
 ```{r, fig.align="center", fig.width=10, fig.height=5}
 hist_01 <- ggplot(cancer_df, aes(dtime)) +
   geom_histogram(aes(fill = deathF), alpha = 0.8, bins = 40, position="identity") +
-  scale_fill_manual(values = c("#d36aa8", "peru"), labels = c("0 - Alive/Censored", "1 - Dead")) +
+  scale_fill_manual(values = c("#d36aa8", "goldenrod3"), labels = c("0 - Alive/Censored", "1 - Dead")) +
   labs(title = " Distribution of survival status (death)") +
   theme(plot.title = element_text(size=12))
 
@@ -348,7 +348,7 @@ ggplot(data=cancer_df_sample) +
   scale_x_continuous("Age (years)", breaks = seq(20, 90, 10), limits = c(20, 90)) +
   scale_y_discrete("Patient ID") +
   scale_shape_manual(NULL, values = c(20,4), labels = c("Alive/Censored", "Died")) +
-  scale_color_manual(NULL, values = c("peru", "red"), labels = c("Alive/Censored", "Died")) +
+  scale_color_manual(NULL, values = c("goldenrod3", "red"), labels = c("Alive/Censored", "Died")) +
   theme_gray()
 
 ```
@@ -367,7 +367,7 @@ ggplot(data=cancer_df_sample) +
   scale_x_continuous("Survival time (days)") +
   scale_y_discrete("Patient ID") +
   scale_shape_manual(NULL, values = c(20,4), labels = c("Alive/Censored", "Died")) +
-  scale_color_manual(NULL, values = c("peru", "red"), labels = c("Alive/Censored", "Died")) +
+  scale_color_manual(NULL, values = c("goldenrod3", "red"), labels = c("Alive/Censored", "Died")) +
   theme_gray()
 
 ```
@@ -505,7 +505,7 @@ survplots <- ggsurvplot(list(m1_age, m1_nodes, m1_size, m1_grade, m1_meno, m1_ho
            xlim = c(0, 7043),
            surv.median.line = "hv",
            ggtheme = theme_bw(), 
-           palette = c("#b4006a", "peru", "green4"),
+           palette = c("#b4006a", "goldenrod3", "green4"),
            risk.table.height = 0.30)
 
 arrange_ggsurvplots(survplots, print = TRUE, ncol = 2, nrow = 4)
