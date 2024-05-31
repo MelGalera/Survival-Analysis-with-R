@@ -132,21 +132,21 @@ summary(cancer_df_stat %>% select(hormonF, chemoF, recurF, deathF))
 ```{r, fig.align='center', fig.width=15, fig.height=5}
 
 p1_age <- ggplot(data = cancer_df, aes(x = age)) +
-  geom_histogram(binwidth= 7, color= "#ce90b4", fill = "#b4006a") +
+  geom_histogram(binwidth= 7, color= "#f1d2e4", fill = "#d36aa8") +
   theme(plot.title = element_text(size = 16), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Age",
        y = "Count",
        title = "Age distribution")
 
 p2_nodes <- ggplot(data = cancer_df, aes(x = nodes)) +
-  geom_histogram(binwidth= 3, color= "#ce90b4", fill = "#b4006a") +
+  geom_histogram(binwidth= 3, color= "#f1d2e4", fill = "#d36aa8") +
   theme(plot.title = element_text(size = 16), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "Nodes",
        y = "Count",
        title = "Nodes distribution")
 
 p3_pgr <- ggplot(data = cancer_df, aes(x = pgr)) +
-  geom_histogram(binwidth= 420, color= "#ce90b4", fill = "#b4006a") +
+  geom_histogram(binwidth= 420, color= "#f1d2e4", fill = "#d36aa8") +
   theme(plot.title = element_text(size = 16), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "pgr",
        y = "Count",
@@ -159,14 +159,14 @@ ggarrange(p1_age, p2_nodes, p3_pgr, ncol =3)
 ```{r, fig.align='center', fig.width=15, fig.height=5}
 
 p4_er <- ggplot(data = cancer_df, aes(x = er)) +
-  geom_histogram(binwidth= 300, color= "#ce90b4", fill = "#b4006a") +
+  geom_histogram(binwidth= 300, color= "#f1d2e4", fill = "#d36aa8") +
   theme(plot.title = element_text(size = 16), axis.title = element_text(size = 16), axis.text = element_text(size = 16)) +
   labs(x = "er",
        y = "Count",
        title = "er distribution")
 
 p5_size <- ggplot(data = cancer_df, aes(x = size)) +
-  geom_bar(width = 0.7, color= "#ce90b4", fill = "#b4006a") +
+  geom_bar(width = 0.7, color= "#f1d2e4", fill = "#d36aa8") +
   geom_text(data = . %>% 
               group_by(size) %>% 
               tally() %>% 
@@ -181,7 +181,7 @@ p5_size <- ggplot(data = cancer_df, aes(x = size)) +
        title = "Size distribution")
 
 p6_grade <- ggplot(data = cancer_df, aes(x = factor(grade))) +
-  geom_bar(width = 0.7, color= "#ce90b4", fill = "#b4006a") +
+  geom_bar(width = 0.7, color= "#f1d2e4", fill = "#d36aa8") +
   geom_text(data = . %>% 
               group_by(grade) %>% 
               tally() %>% 
@@ -205,8 +205,8 @@ ggarrange(p4_er, p5_size, p6_grade, ncol =3)
 p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), fill = factor(meno))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#b4006a", "peru")) +
-  scale_color_manual(values = c("#ce90b4", "goldenrod2")) +
+  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(meno) %>% 
               tally() %>% 
@@ -225,8 +225,8 @@ p7_meno <- ggplot(data = cancer_df, aes(x = factor(meno), color = factor(meno), 
 p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hormon), fill = factor(hormon))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#b4006a", "peru")) +
-  scale_color_manual(values = c("#ce90b4", "goldenrod2")) +
+  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(hormon) %>% 
               tally() %>% 
@@ -244,8 +244,8 @@ p8_hormon <- ggplot(data = cancer_df, aes(x = factor(hormon), color = factor(hor
 p9_chemo <- ggplot(data = cancer_df, aes(x = factor(chemo), color = factor(chemo), fill = factor(chemo))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#b4006a", "peru")) +
-  scale_color_manual(values = c("#d09ea7", "goldenrod2")) +
+  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(chemo) %>% 
               tally() %>% 
@@ -270,8 +270,8 @@ ggarrange(p7_meno, p8_hormon, p9_chemo, ncol = 3)
 p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recur), fill = factor(recur))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#b4006a", "peru")) +
-  scale_color_manual(values = c("#ce90b4", "goldenrod2")) +
+  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(recur) %>% 
               tally() %>% 
@@ -289,8 +289,8 @@ p10_recur <- ggplot(data = cancer_df, aes(x = factor(recur), color = factor(recu
 p11_death <- ggplot(data = cancer_df, aes(x = factor(death), color = factor(death), fill = factor(death))) +
   geom_bar(width = 0.7) +
   scale_x_discrete(labels = c("No", "Yes")) +
-  scale_fill_manual(values = c("#b4006a", "peru")) +
-  scale_color_manual(values = c("#ce90b4", "goldenrod2")) +
+  scale_fill_manual(values = c("#d36aa8", "peru")) +
+  scale_color_manual(values = c("#f1d2e4", "goldenrod2")) +
   geom_text(data = . %>% 
               group_by(death) %>% 
               tally() %>% 
@@ -319,7 +319,7 @@ The figure below shows a histogram of `dtime` and count of patients based on `de
 ```{r, fig.align="center", fig.width=10, fig.height=5}
 hist_01 <- ggplot(cancer_df, aes(dtime)) +
   geom_histogram(aes(fill = deathF), alpha = 0.8, bins = 40, position="identity") +
-  scale_fill_manual(values = c("#b4006a", "peru"), labels = c("0 - Alive/Censored", "1 - Dead")) +
+  scale_fill_manual(values = c("#d36aa8", "peru"), labels = c("0 - Alive/Censored", "1 - Dead")) +
   labs(title = " Distribution of survival status (death)") +
   theme(plot.title = element_text(size=12))
 
