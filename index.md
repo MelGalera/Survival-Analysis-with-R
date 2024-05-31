@@ -818,3 +818,7 @@ stratified Cox reggression model. From the results, the number of
 positive lymph nodes, tumor size, menaupausal status and recurrence
 (relapse) are the main factors that have significant effect on the
 survival rate of the patients.
+
+<br> <br> <br>
+
+------------------------------------------------------------------------
