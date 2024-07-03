@@ -5,18 +5,18 @@ Breast cancer survival analysis with R
 
 ### I. Project objective
 
-Breast cancer is the most common cancer diagnosed in women and is the
-second most common cause of cancer death among women worldwide. The
+Breast cancer is one of the most common cancer diagnosed in women. The
 primary treatment recommended for most types of breast cancer is surgery
-because it is the most effective means of breast cancer removal when it
-is technically feasible to remove it, and recommended in all stages
-except the last.
+as it is the most effective means of breast cancer removal when it is
+technically feasible to remove it. Furthermore, it is recommended in all
+stages except the last.
 
-This project was aimed at performing a survival analysis for primary
-breast cancer patients who have undergone breast cancer surgery based on
-several factors or variables (patient’s characteristics, tumor
-characteristics, and treatment received) and provide estimates of each
-of the variable’s hazard ratios.
+Hence, the objective of this project was to investigate survival of
+primary breast cancer patients based on several factors or variables
+(patient’s characteristics, tumor characteristics, and treatment
+received) and to provide estimates of each of the variable’s hazard
+ratios. The starting point for the survival analysis was the patient’s
+surgery date.
 
 <br>
 
@@ -813,10 +813,10 @@ The following can be interpreted:
 
 In this project, the survival rate of primary breast cancer patients
 were determined based on the available data in the dataset. The hazard
-ratios for each variable (covariate) were also estimated with a
-stratified Cox reggression model. From the results, the number of
-positive lymph nodes, tumor size, menaupausal status and recurrence
-(relapse) are the main factors that have significant effect on the
-survival rate of the patients.
+ratios for each variable (covariate) were estimated with a stratified
+Cox regression model. From the results, the number of positive lymph
+nodes, tumor size, menaupausal status and recurrence (relapse) are the
+main factors that have significant effect on the survival rate of the
+patients.
 
 <br> <br> <br> <br>
