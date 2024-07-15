@@ -809,7 +809,7 @@ The following can be interpreted:
 
 <br> <br>
 
-### V. Conclusion
+### V. Insights
 
 In this project, the survival rate of primary breast cancer patients
 were determined based on the available data in the dataset. The hazard
@@ -817,6 +817,6 @@ ratios for each variable (covariate) were estimated with a stratified
 Cox regression model. From the results, the number of positive lymph
 nodes, tumor size, menaupausal status and recurrence (relapse) are the
 main factors that have significant effect on the survival rate of the
-patients.
+patients as shown in the above findings in terms of hazard ratios .
 
 <br> <br> <br> <br>
